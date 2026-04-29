@@ -1436,6 +1436,7 @@ function init() {
   configurarFormularioCusto();
   carregarDadosVeiculoNaTela();
   configurarAutoSaveVeiculo();
+  controlarCamposCombustivel();
 
   configurarSimulador();
   configurarRelatorios();
@@ -1559,4 +1560,38 @@ function configurarDrawer() {
       overlay.classList.remove("ativo");
     });
   });
+}
+// ===============================
+// BLOCO 36.2 — CONTROLE DE COMBUSTÍVEL (UX PROFISSIONAL)
+// ===============================
+function controlarCamposCombustivel() {
+  const tipo = pegarElemento("veiculo-combustivel-padrao");
+
+  const gasolinaCampos = [
+    pegarElemento("veiculo-preco-gasolina"),
+    pegarElemento("veiculo-consumo-gasolina")
+  ];
+
+  const etanolCampos = [
+    pegarElemento("veiculo-preco-etanol"),
+    pegarElemento("veiculo-consumo-etanol")
+  ];
+
+  function atualizar() {
+    if (!tipo) return;
+
+    if (tipo.value === "gasolina") {
+      gasolinaCampos.forEach(c => c && (c.style.display = "block"));
+      etanolCampos.forEach(c => c && (c.style.display = "none"));
+    }
+
+    if (tipo.value === "etanol") {
+      gasolinaCampos.forEach(c => c && (c.style.display = "none"));
+      etanolCampos.forEach(c => c && (c.style.display = "block"));
+    }
+  }
+
+  tipo?.addEventListener("change", atualizar);
+
+  atualizar(); // inicializa
 }
