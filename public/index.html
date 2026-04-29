@@ -222,6 +222,16 @@
 
     <input type="text" id="veiculo-km-mensal" placeholder="Km médio mensal" inputmode="decimal">
 
+    <select id="veiculo-combustivel-padrao">
+  <option value="gasolina">Gasolina</option>
+  <option value="etanol">Etanol</option>
+</select>
+
+<input type="text" id="veiculo-preco-gasolina" placeholder="Preço gasolina R$" inputmode="decimal">
+<input type="text" id="veiculo-consumo-gasolina" placeholder="Consumo gasolina km/l" inputmode="decimal">
+
+<input type="text" id="veiculo-preco-etanol" placeholder="Preço etanol R$" inputmode="decimal">
+<input type="text" id="veiculo-consumo-etanol" placeholder="Consumo etanol km/l" inputmode="decimal">
     <button type="button" id="btn-calcular-custo-veiculo">Calcular custo fixo/km</button>
 
     <div class="resultado-veiculo">
@@ -328,7 +338,7 @@
 
   <!-- JS -->
 
-<script src="app.js?v=118"></script>
+<script src="app.js?v=121"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js")

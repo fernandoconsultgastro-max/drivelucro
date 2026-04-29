@@ -22,6 +22,18 @@ let dadosVeiculo = JSON.parse(localStorage.getItem("dadosVeiculo")) || {
   custoKmReal: 0
 };
 
+// ===============================
+// BLOCO 28.1 — CADASTRO FIXO DO VEÍCULO
+// ===============================
+const cadastroVeiculoSalvo = JSON.parse(localStorage.getItem("cadastroVeiculoFixo"));
+
+if (cadastroVeiculoSalvo) {
+  dadosVeiculo = {
+    ...dadosVeiculo,
+    ...cadastroVeiculoSalvo
+  };
+}
+
 let regras = JSON.parse(localStorage.getItem("regras")) || {
   valorKmMin: 1.6,
   valorHoraMin: 35,
@@ -80,6 +92,123 @@ function salvar() {
 
 function pegarElemento(id) {
   return document.getElementById(id);
+}
+
+// ===============================
+// BLOCO 36.1 — GARRA DO CADASTRO FIXO DO VEÍCULO
+// MANUTENÇÃO: salva automaticamente qualquer alteração
+// nos campos do veículo, sem depender apenas do botão calcular.
+// ===============================
+function salvarCadastroVeiculoFixo() {
+  const cadastro = {
+    parcela: numeroBR(pegarElemento("veiculo-parcela")?.value),
+    seguro: numeroBR(pegarElemento("veiculo-seguro")?.value),
+    ipva: numeroBR(pegarElemento("veiculo-ipva")?.value),
+    manutencao: numeroBR(pegarElemento("veiculo-manutencao")?.value),
+    oleo: numeroBR(pegarElemento("veiculo-oleo")?.value),
+    pneus: numeroBR(pegarElemento("veiculo-pneus")?.value),
+    lavagem: numeroBR(pegarElemento("veiculo-lavagem")?.value),
+    telefone: numeroBR(pegarElemento("veiculo-telefone")?.value),
+    outros: numeroBR(pegarElemento("veiculo-outros")?.value),
+    kmMensal: numeroBR(pegarElemento("veiculo-km-mensal")?.value),
+
+    combustivelPadrao: pegarElemento("veiculo-combustivel-padrao")?.value || "gasolina",
+    precoGasolina: numeroBR(pegarElemento("veiculo-preco-gasolina")?.value),
+    consumoGasolina: numeroBR(pegarElemento("veiculo-consumo-gasolina")?.value),
+    precoEtanol: numeroBR(pegarElemento("veiculo-preco-etanol")?.value),
+    consumoEtanol: numeroBR(pegarElemento("veiculo-consumo-etanol")?.value),
+
+    custosFixos: dadosVeiculo.custosFixos || 0,
+    custoFixoKm: dadosVeiculo.custoFixoKm || 0,
+    custoCombustivelKm: dadosVeiculo.custoCombustivelKm || 0,
+    custoKmReal: dadosVeiculo.custoKmReal || 0
+  };
+
+  dadosVeiculo = {
+    ...dadosVeiculo,
+    ...cadastro
+  };
+
+  localStorage.setItem("dadosVeiculo", JSON.stringify(dadosVeiculo));
+  localStorage.setItem("cadastroVeiculoFixo", JSON.stringify(dadosVeiculo));
+}
+
+function configurarAutoSaveVeiculo() {
+  const ids = [
+    "veiculo-parcela",
+    "veiculo-seguro",
+    "veiculo-ipva",
+    "veiculo-manutencao",
+    "veiculo-oleo",
+    "veiculo-pneus",
+    "veiculo-lavagem",
+    "veiculo-telefone",
+    "veiculo-outros",
+    "veiculo-km-mensal",
+    "veiculo-combustivel-padrao",
+    "veiculo-preco-gasolina",
+    "veiculo-consumo-gasolina",
+    "veiculo-preco-etanol",
+    "veiculo-consumo-etanol"
+  ];
+
+  ids.forEach(id => {
+    const campo = pegarElemento(id);
+    if (!campo) return;
+
+    campo.addEventListener("input", salvarCadastroVeiculoFixo);
+    campo.addEventListener("change", salvarCadastroVeiculoFixo);
+  });
+}
+// ===============================
+// BLOCO 36 — CARREGAR CADASTRO FIXO DO VEÍCULO
+// ===============================
+function carregarDadosVeiculoNaTela() {
+  const cadastroFixo = JSON.parse(localStorage.getItem("cadastroVeiculoFixo"));
+  const dadosSalvos = JSON.parse(localStorage.getItem("dadosVeiculo"));
+  const cadastro = cadastroFixo || dadosSalvos || dadosVeiculo || {};
+
+  dadosVeiculo = {
+    ...dadosVeiculo,
+    ...cadastro
+  };
+
+  const campos = {
+    "veiculo-parcela": "parcela",
+    "veiculo-seguro": "seguro",
+    "veiculo-ipva": "ipva",
+    "veiculo-manutencao": "manutencao",
+    "veiculo-oleo": "oleo",
+    "veiculo-pneus": "pneus",
+    "veiculo-lavagem": "lavagem",
+    "veiculo-telefone": "telefone",
+    "veiculo-outros": "outros",
+    "veiculo-km-mensal": "kmMensal",
+    "veiculo-preco-gasolina": "precoGasolina",
+    "veiculo-consumo-gasolina": "consumoGasolina",
+    "veiculo-preco-etanol": "precoEtanol",
+    "veiculo-consumo-etanol": "consumoEtanol"
+  };
+
+  Object.keys(campos).forEach(id => {
+    const el = pegarElemento(id);
+    if (!el) return;
+
+    const valor = dadosVeiculo[campos[id]];
+    el.value = valor ? String(valor).replace(".", ",") : "";
+  });
+
+  const combustivelPadrao = pegarElemento("veiculo-combustivel-padrao");
+  if (combustivelPadrao && dadosVeiculo.combustivelPadrao) {
+    combustivelPadrao.value = dadosVeiculo.combustivelPadrao;
+  }
+
+  const resultado = pegarElemento("resultado-custo-veiculo");
+  if (resultado) {
+    resultado.textContent = dadosVeiculo.custoKmReal > 0
+      ? `Custo total/km: ${moeda(dadosVeiculo.custoKmReal)}`
+      : "Custo total/km: R$ 0,00";
+  }
 }
 
 function converterDataBR(dataBR) {
@@ -164,6 +293,7 @@ function metaDoPeriodo() {
 
 // ===============================
 // BLOCO 29 — CUSTO REAL DO VEÍCULO
+// MANUTENÇÃO: calcula custo fixo/km + combustível/km.
 // ===============================
 function configurarCustoVeiculo() {
   const parcela = pegarElemento("veiculo-parcela");
@@ -176,6 +306,13 @@ function configurarCustoVeiculo() {
   const telefone = pegarElemento("veiculo-telefone");
   const outros = pegarElemento("veiculo-outros");
   const kmMensal = pegarElemento("veiculo-km-mensal");
+
+  const combustivelPadrao = pegarElemento("veiculo-combustivel-padrao");
+  const precoGasolina = pegarElemento("veiculo-preco-gasolina");
+  const consumoGasolina = pegarElemento("veiculo-consumo-gasolina");
+  const precoEtanol = pegarElemento("veiculo-preco-etanol");
+  const consumoEtanol = pegarElemento("veiculo-consumo-etanol");
+
   const botao = pegarElemento("btn-calcular-custo-veiculo");
   const resultado = pegarElemento("resultado-custo-veiculo");
 
@@ -195,45 +332,94 @@ function configurarCustoVeiculo() {
 
     const kmMensalValor = numeroBR(kmMensal?.value);
 
+    const precoGasolinaValor = numeroBR(precoGasolina?.value);
+    const consumoGasolinaValor = numeroBR(consumoGasolina?.value);
+    const precoEtanolValor = numeroBR(precoEtanol?.value);
+    const consumoEtanolValor = numeroBR(consumoEtanol?.value);
+
+    const tipoCombustivel = combustivelPadrao?.value || "gasolina";
+
     if (!kmMensalValor) {
       alert("Preencha o km médio mensal.");
       return;
     }
 
+    if (tipoCombustivel === "gasolina" && (!precoGasolinaValor || !consumoGasolinaValor)) {
+      alert("Preencha preço e consumo da gasolina.");
+      return;
+    }
+
+    if (tipoCombustivel === "etanol" && (!precoEtanolValor || !consumoEtanolValor)) {
+      alert("Preencha preço e consumo do etanol.");
+      return;
+    }
+
     const custoFixoKm = totalFixos / kmMensalValor;
 
-    dadosVeiculo = {
-      custosFixos: totalFixos,
-      kmMensal: kmMensalValor,
-      custoKmReal: custoFixoKm
-    };
+    const custoCombustivelKm =
+      tipoCombustivel === "gasolina"
+        ? precoGasolinaValor / consumoGasolinaValor
+        : precoEtanolValor / consumoEtanolValor;
 
-    let historicoVeiculo = JSON.parse(localStorage.getItem("historicoVeiculo")) || [];
+    const custoTotalKm = custoFixoKm + custoCombustivelKm;
+
+    dadosVeiculo.parcela = numeroBR(parcela?.value);
+    dadosVeiculo.seguro = numeroBR(seguro?.value);
+    dadosVeiculo.ipva = numeroBR(ipva?.value);
+    dadosVeiculo.manutencao = numeroBR(manutencao?.value);
+    dadosVeiculo.oleo = numeroBR(oleo?.value);
+    dadosVeiculo.pneus = numeroBR(pneus?.value);
+    dadosVeiculo.lavagem = numeroBR(lavagem?.value);
+    dadosVeiculo.telefone = numeroBR(telefone?.value);
+    dadosVeiculo.outros = numeroBR(outros?.value);
+
+    dadosVeiculo.kmMensal = kmMensalValor;
+    dadosVeiculo.custosFixos = totalFixos;
+
+    dadosVeiculo.combustivelPadrao = tipoCombustivel;
+    dadosVeiculo.precoGasolina = precoGasolinaValor;
+    dadosVeiculo.consumoGasolina = consumoGasolinaValor;
+    dadosVeiculo.precoEtanol = precoEtanolValor;
+    dadosVeiculo.consumoEtanol = consumoEtanolValor;
+
+    dadosVeiculo.custoFixoKm = custoFixoKm;
+    dadosVeiculo.custoCombustivelKm = custoCombustivelKm;
+    dadosVeiculo.custoKmReal = custoTotalKm;
 
     localStorage.setItem("dadosVeiculo", JSON.stringify(dadosVeiculo));
+    localStorage.setItem("cadastroVeiculoFixo", JSON.stringify(dadosVeiculo));
+
     historicoVeiculo.unshift({
-    data: new Date().toLocaleString("pt-BR"),
-    custosFixos: totalFixos,
-    kmMensal: kmMensalValor,
-    custoKm: custoFixoKm
+      data: new Date().toLocaleString("pt-BR"),
+      custosFixos: totalFixos,
+      kmMensal: kmMensalValor,
+      combustivel: tipoCombustivel,
+      custoFixoKm,
+      custoCombustivelKm,
+      custoKm: custoTotalKm
     });
 
-    historicoVeiculo = historicoVeiculo.slice(0, 12);
+    historicoVeiculo = historicoVeiculo.slice(0, 3);
     localStorage.setItem("historicoVeiculo", JSON.stringify(historicoVeiculo));
 
-    renderizarHistoricoVeiculo();
-
     if (resultado) {
-      resultado.textContent = `Custo fixo/km: ${moeda(custoFixoKm)}`;
+      resultado.textContent =
+        `Custo total/km: ${moeda(custoTotalKm)} | Fixo/km: ${moeda(custoFixoKm)} | Combustível/km: ${moeda(custoCombustivelKm)}`;
     }
 
     const campoCustoKm = pegarElemento("sim-custo-km");
     if (campoCustoKm) {
-      campoCustoKm.value = custoFixoKm.toFixed(2).replace(".", ",");
+      campoCustoKm.value = custoTotalKm.toFixed(2).replace(".", ",");
     }
+
+    carregarDadosVeiculoNaTela();
+    renderizarHistoricoVeiculo();
+    renderizar();
+    atualizarDashboard();
+
+    alert("Custo total/km atualizado com sucesso.");
   });
 }
-
 
 function configurarRegras() {
   const valorKm = pegarElemento("regra-valor-km");
@@ -305,21 +491,32 @@ function calcularResumo() {
   const custosPeriodo = filtrarPorPeriodo(custos);
 
   const faturamento = corridasPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
-  const custosTotal = custosPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
-  const lucro = faturamento - custosTotal;
+  const custosVariaveis = custosPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
+
   const km = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
   const tempo = corridasPeriodo.reduce((t, c) => t + Number(c.tempo || 0), 0);
 
+  // 🔥 NOVO: custo real do veículo
+  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 1.55;
+  const custoRodagem = km * custoKm;
+
+  // 🔥 NOVO: custo total real
+  const custoTotal = custosVariaveis + custoRodagem;
+
+  const lucro = faturamento - custoTotal;
+
   return {
     faturamento,
-    custosTotal,
+    custosTotal: custoTotal,
+    custosVariaveis,
+    custoRodagem,
     lucro,
     km,
     tempo,
     valorKm: km > 0 ? faturamento / km : 0,
     valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
     ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
-    custoKm: km > 0 ? custosTotal / km : 0,
+    custoKm,
     totalCorridas: corridasPeriodo.length
   };
 }
@@ -528,26 +725,21 @@ function configurarFormularioCusto() {
     if (!valor) {
       alert("Preencha o valor do custo.");
       return;
-      salvar();
-      renderizar();
-      atualizarDashboard();
-
-      form.reset();
-     pegarElemento("custo-categoria").value = "Combustível";
-  }
+    }
 
     custos.push({
-     data: formatarDataInput(pegarElemento("data-selecionada").value) || dataHoje(),
+      data: formatarDataInput(pegarElemento("data-selecionada").value) || dataHoje(),
       categoria,
       valor
     });
 
-   salvar();
-renderizar();
-atualizarDashboard();
+    salvar();
+    renderizar();
+    atualizarDashboard();
 
-form.reset();
-pegarElemento("custo-categoria").value = "Combustível";
+    // 🔥 limpeza correta
+    form.reset();
+    pegarElemento("custo-categoria").value = "Combustível";
   });
 }
 
@@ -1242,6 +1434,8 @@ function init() {
   configurarMenu();
   configurarFormularioCorrida();
   configurarFormularioCusto();
+  carregarDadosVeiculoNaTela();
+
   configurarSimulador();
   configurarRelatorios();
   configurarCardsDashboard();
@@ -1252,7 +1446,7 @@ function init() {
   configurarControleData();
   configurarCustoVeiculo();
   renderizarHistoricoVeiculo();
-
+ 
   configurarDrawer();
 
   renderizar();
