@@ -1435,6 +1435,7 @@ function init() {
   configurarFormularioCorrida();
   configurarFormularioCusto();
   carregarDadosVeiculoNaTela();
+  configurarAutoSaveVeiculo();
 
   configurarSimulador();
   configurarRelatorios();
