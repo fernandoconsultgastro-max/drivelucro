@@ -1595,3 +1595,38 @@ function controlarCamposCombustivel() {
 
   atualizar(); // inicializa
 }
+// ===============================
+// BLOCO 40 — FECHAMENTO REAL DO DIA
+// ===============================
+function calcularFechamentoDia() {
+
+  const kmInicial = parseFloat(pegarElemento("km-inicial")?.value?.replace(",", ".") || 0);
+  const kmFinal = parseFloat(pegarElemento("km-final")?.value?.replace(",", ".") || 0);
+
+  if (!kmInicial || !kmFinal || kmFinal <= kmInicial) {
+    alert("Preencha KM inicial e final corretamente.");
+    return;
+  }
+
+  const kmRodado = kmFinal - kmInicial;
+
+  const dadosVeiculo = JSON.parse(localStorage.getItem("dadosVeiculo")) || {};
+  const custoKm = dadosVeiculo.custoKmReal || 0;
+
+  const corridas = JSON.parse(localStorage.getItem("corridas")) || [];
+  const custos = JSON.parse(localStorage.getItem("custos")) || [];
+
+  // faturamento do dia
+  const faturamento = corridas.reduce((total, c) => total + Number(c.valor || 0), 0);
+
+  // custos variáveis
+  const custosVariaveis = custos.reduce((total, c) => total + Number(c.valor || 0), 0);
+
+  const custoTotal = kmRodado * custoKm;
+
+  const lucro = faturamento - custoTotal - custosVariaveis;
+
+  pegarElemento("km-rodado-dia").innerText = `KM rodado: ${kmRodado.toFixed(1)} km`;
+  pegarElemento("custo-dia").innerText = `Custo do dia: R$ ${custoTotal.toFixed(2)}`;
+  pegarElemento("lucro-dia").innerText = `Lucro real: R$ ${lucro.toFixed(2)}`;
+}

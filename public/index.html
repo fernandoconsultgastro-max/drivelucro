@@ -299,40 +299,64 @@
 
     </section>
 
-    <!-- RELATÓRIOS -->
-    <section id="tela-relatorios" class="tela">
-      <h2>Relatórios</h2>
+  <!-- RELATÓRIOS -->
+<section id="tela-relatorios" class="tela">
+  <h2>Relatórios</h2>
 
-      <div class="cards">
-        <div class="card">
-          <span>Total de corridas</span>
-          <strong id="rel-total-corridas">0</strong>
-        </div>
+  <div class="cards">
+    <div class="card">
+      <span>Total de corridas</span>
+      <strong id="rel-total-corridas">0</strong>
+    </div>
 
-        <div class="card">
-          <span>Ticket médio</span>
-          <strong id="rel-ticket-medio">R$ 0,00</strong>
-        </div>
+    <div class="card">
+      <span>Ticket médio</span>
+      <strong id="rel-ticket-medio">R$ 0,00</strong>
+    </div>
 
-        <div class="card">
-          <span>Custo/km</span>
-          <strong id="rel-custo-km">R$ 0,00</strong>
-        </div>
+    <div class="card">
+      <span>Custo/km</span>
+      <strong id="rel-custo-km">R$ 0,00</strong>
+    </div>
 
-        <div class="card">
-          <span>Lucro real</span>
-          <strong id="rel-lucro-real">R$ 0,00</strong>
-        </div>
-      </div>
+    <div class="card">
+      <span>Lucro real</span>
+      <strong id="rel-lucro-real">R$ 0,00</strong>
+    </div>
+  </div>
 
-      <button id="btn-exportar">Exportar CSV</button>
-      <button id="btn-limpar-dados">Limpar dados</button>
+  <button id="btn-exportar">Exportar CSV</button>
+  <button id="btn-limpar-dados">Limpar dados</button>
 
-      <div class="relatorio-anual-box">
-        <h3>Fechamento anual</h3>
-        <div id="relatorio-anual"></div>
-      </div>
-    </section>
+  <div class="relatorio-anual-box">
+    <h3>Fechamento anual</h3>
+    <div id="relatorio-anual"></div>
+  </div>
+
+  <!-- 🔥 BLOCO 40 — FECHAMENTO REAL DO DIA -->
+  <div class="relatorio-box">
+    <h3>Fechamento real do dia</h3>
+
+    <p style="font-size: 13px; color: #94a3b8;">
+      Use o KM do odômetro do seu carro para calcular seu lucro real.
+    </p>
+
+    <input id="km-inicial" placeholder="KM inicial (início do dia)" inputmode="decimal">
+    <input id="km-final" placeholder="KM final (fim do dia)" inputmode="decimal">
+
+    <button onclick="calcularFechamentoDia()">Calcular lucro real</button>
+
+    <div class="resultado" style="margin-top: 12px;">
+      <p id="km-rodado-dia">KM rodado: -</p>
+      <p id="custo-dia">Custo do dia: -</p>
+
+      <p id="lucro-dia" style="font-weight: 900; font-size: 18px;">
+        Lucro real: -
+      </p>
+    </div>
+  </div>
+
+</section>
 
   </main>
 
