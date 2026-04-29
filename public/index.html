@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DriveLucro</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="/icon-192.png">
+  <meta name="theme-color" content="#7CFC00">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- SPLASH -->
+  <div id="splash-screen">
+    <div class="splash-content">
+      <img src="/icon-512.png" alt="DriveLucro">
+      <h1>Drive<span>Lucro</span></h1>
+      <p>Controle. Decisão. Lucro.</p>
+    </div>
+  </div>
+
+<!-- BLOCO 30 — BOTÃO MENU -->
+<button id="btn-menu" class="btn-menu">☰</button>
+
+<!-- BLOCO 30 — MENU LATERAL -->
+<div id="drawer" class="drawer">
+
+  <div class="drawer-header">
+    <h3>DriveLucro</h3>
+    <span>Controle inteligente</span>
+  </div>
+
+  <button class="drawer-item" data-tela="dashboard"> Início</button>
+  <button class="drawer-item" data-tela="corridas"> Corridas</button>
+  <button class="drawer-item" data-tela="custos"> Custos</button>
+  <button class="drawer-item" data-tela="simulador"> Simulador</button>
+  <button class="drawer-item" data-tela="relatorios"> Relatórios</button>
+
+  <hr>
+<button class="drawer-item" data-tela="veiculo"> Meu Veículo</button>
+
+</div>
+
+<!-- OVERLAY (APENAS UMA VEZ) -->
+<div id="overlay" class="overlay"></div>
+
+<!-- HEADER CORRETO -->
+<header class="topo">
+  <h1>Drive<span>Lucro</span></h1>
+  <p>Controle financeiro para motoristas</p>
+</header>
+
+<main class="container">
+
+  <!-- PERÍODO -->
+  <section class="periodo-box">
+    <button class="periodo-btn" data-periodo="dia">Dia</button>
+    <button class="periodo-btn" data-periodo="semana">Semana</button>
+    <button class="periodo-btn ativo" data-periodo="mes">Mês</button>
+    <button class="periodo-btn" data-periodo="ano">Ano</button>
+  </section>
+
+    <!-- DASHBOARD -->
+    <section id="tela-dashboard" class="tela ativa">
+
+      <!-- CONTROLE DE DATA -->
+      <div class="controle-data">
+        <button id="btn-dia-anterior">←</button>
+        <input type="date" id="data-selecionada">
+        <button id="btn-proximo-dia">→</button>
+      </div>
+
+      <h2>Dashboard</h2>
+
+    <!-- CARDS -->
+<div class="cards">
+
+  <button class="card card-click card-faturamento" data-acao-card="relatorios">
+    <span>Faturamento</span>
+    <strong id="faturamento">R$ 0,00</strong>
+    <small>Ver relatório</small>
+  </button>
+
+  <button class="card card-click card-custos" data-acao-card="custos">
+    <span>Custos</span>
+    <strong id="custos">R$ 0,00</strong>
+    <small>Lançar/ver custos</small>
+  </button>
+
+  <button id="card-lucro" class="card card-click card-lucro destaque" data-acao-card="relatorios">
+    <span>Lucro</span>
+    <strong id="lucro">R$ 0,00</strong>
+    <small>Resultado real</small>
+  </button>
+
+  <!-- CORREÇÃO AQUI -->
+  <button class="card card-click card-km" data-acao-card="corridas">
+    <span>Km</span>
+    <strong id="km-total">0 km</strong>
+    <small>Ver corridas</small>
+  </button>
+
+  <button id="card-custo-km" class="card card-click card-valor-km" data-acao-card="simulador">
+    <span>Valor/km</span>
+    <strong id="valor-km">R$ 0,00</strong>
+    <small>Simular chamada</small>
+  </button>
+
+  <!-- CORREÇÃO FINAL -->
+  <button id="card-valor-hora" class="card card-click card-valor-hora" data-acao-card="simulador">
+    <span>Valor/hora</span>
+    <strong id="valor-hora">R$ 0,00</strong>
+    <small>Analisar tempo</small>
+  </button>
+
+</div>
+
+      <!-- META -->
+      <div class="meta-box">
+        <h3>Meta do período</h3>
+        <p id="meta-info">Faltam R$ 0,00</p>
+
+        <div class="barra-meta">
+          <div id="barra-meta"></div>
+        </div>
+
+        <span id="meta-percentual">0%</span>
+      </div>
+
+      <!-- DIAGNÓSTICO -->
+      <div class="diagnostico-box">
+        <h3>Diagnóstico</h3>
+        <p id="diagnostico-texto">Analisando...</p>
+      </div>
+
+      <!-- GRÁFICO -->
+      <div class="grafico-box">
+        <h3>Desempenho</h3>
+        <canvas id="grafico-financeiro"></canvas>
+      </div>
+
+      <!-- EVOLUÇÃO -->
+      <div class="grafico-box">
+        <h3>Evolução do período</h3>
+        <canvas id="grafico-evolucao"></canvas>
+      </div>
+
+      <!-- PREVISÃO -->
+      <div class="diagnostico-box">
+        <h3>Previsão</h3>
+        <p id="previsao-texto">Calculando...</p>
+      </div>
+
+    </section>
+<!-- CORRIDAS -->
+<section id="tela-corridas" class="tela">
+  <h2>Corridas</h2>
+
+  <form id="form-corrida">
+    <select id="corrida-app">
+      <option value="Uber">Uber</option>
+      <option value="99">99</option>
+      <option value="InDrive">InDrive</option>
+      <option value="Particular">Particular</option>
+    </select>
+
+    <input type="date" id="corrida-data">
+    <input type="text" id="corrida-valor" placeholder="Valor R$" inputmode="decimal">
+    <input type="text" id="corrida-km" placeholder="Km" inputmode="decimal">
+    <input type="text" id="corrida-tempo" placeholder="Tempo (min)" inputmode="numeric">
+
+    <button type="submit">Salvar corrida</button>
+  </form>
+
+  <div id="lista-corridas"></div>
+</section>
+
+ <!-- CUSTOS -->
+<section id="tela-custos" class="tela">
+  <h2>Custos variáveis</h2>
+
+  <form id="form-custo">
+    <select id="custo-categoria">
+      <option value="Combustível">Combustível</option>
+      <option value="Alimentação">Alimentação</option>
+      <option value="Pedágio">Pedágio</option>
+      <option value="Estacionamento">Estacionamento</option>
+      <option value="Multa">Multa</option>
+      <option value="Outros">Outros</option>
+    </select>
+
+    <input type="text" id="custo-valor" placeholder="Valor R$" inputmode="decimal">
+    <button type="submit">Salvar custo</button>
+  </form>
+
+  <div id="lista-custos"></div>
+</section>
+
+<!-- MEU VEÍCULO -->
+<section id="tela-veiculo" class="tela">
+  <h2>Meu veículo</h2>
+
+  <div class="veiculo-box">
+    <h3>Custos fixos mensais</h3>
+
+    <input type="text" id="veiculo-parcela" placeholder="Parcela/aluguel do carro R$" inputmode="decimal">
+    <input type="text" id="veiculo-seguro" placeholder="Seguro mensal R$" inputmode="decimal">
+    <input type="text" id="veiculo-ipva" placeholder="IPVA/licenciamento mensal R$" inputmode="decimal">
+    <input type="text" id="veiculo-manutencao" placeholder="Manutenção preventiva média R$" inputmode="decimal">
+    <input type="text" id="veiculo-oleo" placeholder="Troca de óleo média R$" inputmode="decimal">
+    <input type="text" id="veiculo-pneus" placeholder="Reserva para pneus R$" inputmode="decimal">
+    <input type="text" id="veiculo-lavagem" placeholder="Lavagem mensal R$" inputmode="decimal">
+    <input type="text" id="veiculo-telefone" placeholder="Telefone/internet/apps R$" inputmode="decimal">
+    <input type="text" id="veiculo-outros" placeholder="Outros custos fixos R$" inputmode="decimal">
+
+    <input type="text" id="veiculo-km-mensal" placeholder="Km médio mensal" inputmode="decimal">
+
+    <button type="button" id="btn-calcular-custo-veiculo">Calcular custo fixo/km</button>
+
+    <div class="resultado-veiculo">
+      <p id="resultado-custo-veiculo">Custo fixo/km: R$ 0,00</p>
+    </div>
+  </div>
+
+  <div class="historico-veiculo-box">
+  <h3>Histórico do veículo</h3>
+  <div id="historico-veiculo"></div>
+</div>
+
+</section>
+
+<!-- SIMULADOR -->
+    <section id="tela-simulador" class="tela">
+      <h2>Simulador</h2>
+
+      <!-- PARSER -->
+      <div class="parser-box">
+        <h3>Leitor de chamada</h3>
+
+        <div id="decisao-rapida" class="decisao-rapida oculto">
+          Aguardando chamada...
+        </div>
+
+        <textarea id="texto-chamada" placeholder="Ex: R$ 55,50 • 18,3 km • 35 min • 4.8 ★"></textarea>
+        <button id="btn-processar-chamada">Processar chamada</button>
+
+        <div id="historico-chamadas"></div>
+      </div>
+
+      <!-- REGRAS -->
+      <div class="regras-box">
+        <h3>Minhas regras</h3>
+        <input id="regra-valor-km" placeholder="Valor mínimo por km">
+        <input id="regra-valor-hora" placeholder="Valor mínimo por hora">
+        <input id="regra-km-max" placeholder="Km máximo">
+        <input id="regra-nota" placeholder="Nota mínima">
+      </div>
+
+      <!-- FORM -->
+    <form id="form-simulador">
+  <select id="sim-tipo-corrida">
+    <option value="app">Corrida por aplicativo</option>
+    <option value="particular">Corrida particular</option>
+  </select>
+
+  <select id="sim-app">
+    <option value="Uber">Uber</option>
+    <option value="99">99</option>
+    <option value="InDrive">InDrive</option>
+    <option value="Particular">Particular</option>
+  </select>
+
+  <input id="sim-valor" placeholder="Valor R$">
+        <input id="sim-km" placeholder="Km">
+        <input id="sim-tempo" placeholder="Tempo">
+        <input id="sim-custo-km" placeholder="Custo/km">
+        <input id="sim-nota" placeholder="Nota passageiro">
+        <button type="submit">Analisar</button>
+      </form>
+
+      <div id="resultado-simulador" class="resultado oculto"></div>
+
+    </section>
+
+    <!-- RELATÓRIOS -->
+    <section id="tela-relatorios" class="tela">
+      <h2>Relatórios</h2>
+
+      <div class="cards">
+        <div class="card">
+          <span>Total de corridas</span>
+          <strong id="rel-total-corridas">0</strong>
+        </div>
+
+        <div class="card">
+          <span>Ticket médio</span>
+          <strong id="rel-ticket-medio">R$ 0,00</strong>
+        </div>
+
+        <div class="card">
+          <span>Custo/km</span>
+          <strong id="rel-custo-km">R$ 0,00</strong>
+        </div>
+
+        <div class="card">
+          <span>Lucro real</span>
+          <strong id="rel-lucro-real">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <button id="btn-exportar">Exportar CSV</button>
+      <button id="btn-limpar-dados">Limpar dados</button>
+
+      <div class="relatorio-anual-box">
+        <h3>Fechamento anual</h3>
+        <div id="relatorio-anual"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- JS -->
+
+<script src="app.js?v=118"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/service-worker.js")
+        .then(() => console.log("PWA ativo"));
+    }
+  </script>
+
+</body>
+</html>
