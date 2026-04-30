@@ -561,43 +561,36 @@ function configurarCustoVeiculo() {
     alert("Custo total/km atualizado com sucesso.");
   });
 }
-
+// ===============================
+// BLOCO 33 — REGRAS DO SIMULADOR
+// MANUTENÇÃO:
+// Não preenche campos com zero.
+// Mantém apenas placeholder visual até o motorista definir regras.
+// ===============================
 function configurarRegras() {
   const valorKm = pegarElemento("regra-valor-km");
   const valorHora = pegarElemento("regra-valor-hora");
   const kmMax = pegarElemento("regra-km-max");
   const nota = pegarElemento("regra-nota");
-  const custoKmPadrao = pegarElemento("regra-custo-km");
 
-  if (!valorKm) return;
+  if (!valorKm || !valorHora || !kmMax || !nota) return;
 
-  valorKm.value = regras.valorKmMin;
-  valorHora.value = regras.valorHoraMin;
-  kmMax.value = regras.kmMax;
-  nota.value = regras.notaMin;
+  valorKm.value = regras.valorKmMin > 0 ? String(regras.valorKmMin).replace(".", ",") : "";
+  valorHora.value = regras.valorHoraMin > 0 ? String(regras.valorHoraMin).replace(".", ",") : "";
+  kmMax.value = regras.kmMax > 0 ? String(regras.kmMax).replace(".", ",") : "";
+  nota.value = regras.notaMin > 0 ? String(regras.notaMin).replace(".", ",") : "";
 
-  if (custoKmPadrao) {
-    custoKmPadrao.value = regras.custoKmPadrao || 1.55;
-  }
-
-  [valorKm, valorHora, kmMax, nota, custoKmPadrao].forEach(input => {
-    if (!input) return;
-
+  [valorKm, valorHora, kmMax, nota].forEach(input => {
     input.addEventListener("change", () => {
       regras.valorKmMin = numeroBR(valorKm.value);
       regras.valorHoraMin = numeroBR(valorHora.value);
       regras.kmMax = numeroBR(kmMax.value);
       regras.notaMin = numeroBR(nota.value);
 
-      if (custoKmPadrao) {
-        regras.custoKmPadrao = numeroBR(custoKmPadrao.value);
-      }
-
       localStorage.setItem("regras", JSON.stringify(regras));
     });
   });
 }
-
 
 // ===============================
 // NAVEGAÇÃO
@@ -1019,10 +1012,11 @@ function configurarParserChamada() {
     const custoKmInput = pegarElemento("sim-custo-km");
 
     if (custoKmInput && !custoKmInput.value) {
-      custoKmInput.value =
-        tipoCorrida === "particular"
-          ? String(regras.custoKmPadrao || 1.55).replace(".", ",")
-          : "0";
+   const custoBase = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+
+   custoKmInput.value = custoBase > 0
+    ? String(custoBase.toFixed(2)).replace(".", ",")
+    : "";
     }
 
     const formSimulador = pegarElemento("form-simulador");
@@ -1111,17 +1105,19 @@ function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
 // ===============================
 // BLOCO PREMIUM 03.1 — MOTOR DE DECISÃO DO SIMULADOR
 // MANUTENÇÃO:
-// Unifica o cálculo da corrida.
-// Fórmula:
-// valor/km = valor / km
-// valor/hora = valor / (tempo / 60)
-// lucro = valor - (km * custoKm)
+// Decisão mais conservadora.
+// Evita aceitar corrida longa só porque o valor/hora ficou alto.
 // ===============================
 function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   const valorKm = km > 0 ? valor / km : 0;
   const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
   const custoEstimado = km * custoKm;
   const lucroEstimado = valor - custoEstimado;
+
+  const regraValorKm = regras.valorKmMin > 0 ? regras.valorKmMin : 1.45;
+  const regraValorHora = regras.valorHoraMin > 0 ? regras.valorHoraMin : 35;
+  const regraKmMax = regras.kmMax > 0 ? regras.kmMax : 25;
+  const regraNota = regras.notaMin > 0 ? regras.notaMin : 4.1;
 
   let decisao = "RECUSAR";
   let tipo = "recusar";
@@ -1131,27 +1127,27 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   if (lucroEstimado <= 0) {
     motivo = "A corrida gera prejuízo após descontar o custo real/km.";
   } else {
-    if (valorKm >= custoKm * 2) score += 40;
-    else if (valorKm >= custoKm * 1.5) score += 28;
-    else if (valorKm >= custoKm * 1.2) score += 15;
+    if (valorKm >= regraValorKm) score += 30;
+    else if (valorKm >= custoKm * 1.5) score += 18;
 
-    if (valorHora >= 60) score += 30;
-    else if (valorHora >= 40) score += 22;
+    if (valorHora >= regraValorHora) score += 25;
     else if (valorHora >= 25) score += 12;
 
-    if (lucroEstimado >= 30) score += 20;
-    else if (lucroEstimado >= 15) score += 14;
-    else if (lucroEstimado > 0) score += 8;
+    if (km <= regraKmMax) score += 20;
+    else if (km <= regraKmMax * 1.4) score += 8;
 
-    if (notaPassageiro >= 4.8) score += 10;
-    else if (notaPassageiro >= 4.5) score += 5;
+    if (lucroEstimado >= 30) score += 15;
+    else if (lucroEstimado >= 15) score += 10;
+    else if (lucroEstimado > 0) score += 5;
+
+    if (notaPassageiro >= regraNota) score += 10;
 
     score = Math.min(score, 100);
 
-    if (score >= 75) {
+    if (score >= 80 && km <= regraKmMax && valorKm >= regraValorKm) {
       decisao = "ACEITAR";
       tipo = "aceitar";
-      motivo = "Boa corrida: valor/km, valor/hora e lucro estão fortes.";
+      motivo = "Boa corrida: rentabilidade forte dentro das suas regras.";
     } else if (score >= 45) {
       decisao = "ANALISAR";
       tipo = "analisar";
