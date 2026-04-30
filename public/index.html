@@ -28,119 +28,24 @@
 
 <!-- BLOCO 30 — BOTÃO MENU -->
 <button id="btn-menu" class="btn-menu">☰</button>
+<div class="card">
+ <div class="card">
+  <span>Meta do período</span>
 
-<!-- BLOCO 30 — MENU LATERAL -->
-<div id="drawer" class="drawer">
+  <input 
+    id="input-meta" 
+    placeholder="Definir meta (R$)" 
+    style="margin-top:8px;"
+  />
 
-  <div class="drawer-header">
-    <h3>DriveLucro</h3>
-    <span>Controle inteligente</span>
+  <button onclick="definirMeta()">Salvar meta</button>
+
+  <p id="meta-info"></p>
+  <div class="barra-meta">
+    <div id="barra-meta"></div>
   </div>
-
-  <button class="drawer-item" data-tela="dashboard"> Início</button>
-  <button class="drawer-item" data-tela="corridas"> Corridas</button>
-  <button class="drawer-item" data-tela="custos"> Custos</button>
-  <button class="drawer-item" data-tela="simulador"> Simulador</button>
-  <button class="drawer-item" data-tela="relatorios"> Relatórios</button>
-
-  <hr>
-<button class="drawer-item" data-tela="veiculo"> Meu Veículo</button>
-
+  <span id="meta-percentual"></span>
 </div>
-
-<!-- OVERLAY (APENAS UMA VEZ) -->
-<div id="overlay" class="overlay"></div>
-
-<!-- HEADER CORRETO -->
-<header class="topo">
-  <h1>Drive<span>Lucro</span></h1>
-  <p>Controle financeiro para motoristas</p>
-</header>
-
-<main class="container">
-
-  <!-- PERÍODO -->
-  <section class="periodo-box">
-    <button class="periodo-btn" data-periodo="dia">Dia</button>
-    <button class="periodo-btn" data-periodo="semana">Semana</button>
-    <button class="periodo-btn ativo" data-periodo="mes">Mês</button>
-    <button class="periodo-btn" data-periodo="ano">Ano</button>
-  </section>
-
-    <!-- DASHBOARD -->
-    <section id="tela-dashboard" class="tela ativa">
-
-      <!-- CONTROLE DE DATA -->
-      <div class="controle-data">
-        <button id="btn-dia-anterior">←</button>
-        <input type="date" id="data-selecionada">
-        <button id="btn-proximo-dia">→</button>
-      </div>
-
-      <h2>Dashboard</h2>
-
-      <div id="desempenho-box"></div>
-
-    <!-- CARDS -->
-<div class="cards">
-
-  <button class="card card-click card-faturamento" data-acao-card="relatorios">
-    <span>Faturamento</span>
-    <strong id="faturamento">R$ 0,00</strong>
-    <small>Ver relatório</small>
-  </button>
-
-  <button class="card card-click card-custos" data-acao-card="custos">
-    <span>Custos</span>
-    <strong id="custos">R$ 0,00</strong>
-    <small>Lançar/ver custos</small>
-  </button>
-
-  <button id="card-lucro" class="card card-click card-lucro destaque" data-acao-card="relatorios">
-    <span>Lucro</span>
-    <strong id="lucro">R$ 0,00</strong>
-    <small>Resultado real</small>
-  </button>
-
-  <!-- CORREÇÃO AQUI -->
-  <button class="card card-click card-km" data-acao-card="corridas">
-    <span>Km</span>
-    <strong id="km-total">0 km</strong>
-    <small>Ver corridas</small>
-  </button>
-
-  <button id="card-custo-km" class="card card-click card-valor-km" data-acao-card="simulador">
-    <span>Valor/km</span>
-    <strong id="valor-km">R$ 0,00</strong>
-    <small>Simular chamada</small>
-  </button>
-
-  <!-- CORREÇÃO FINAL -->
-  <button id="card-valor-hora" class="card card-click card-valor-hora" data-acao-card="simulador">
-    <span>Valor/hora</span>
-    <strong id="valor-hora">R$ 0,00</strong>
-    <small>Analisar tempo</small>
-  </button>
-
-</div>
-
-      <!-- META -->
-      <div class="meta-box">
-        <h3>Meta do período</h3>
-        <p id="meta-info">Faltam R$ 0,00</p>
-
-        <div class="barra-meta">
-          <div id="barra-meta"></div>
-        </div>
-
-        <span id="meta-percentual">0%</span>
-      </div>
-
-      <!-- DIAGNÓSTICO -->
-      <div class="diagnostico-box">
-        <h3>Diagnóstico</h3>
-        <p id="diagnostico-texto">Analisando...</p>
-      </div>
 
       <!-- GRÁFICO -->
       <div class="grafico-box">

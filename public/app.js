@@ -6,7 +6,7 @@
 let corridas = JSON.parse(localStorage.getItem("corridas")) || [];
 let custos = JSON.parse(localStorage.getItem("custos")) || [];
 
-const META_DIARIA = 300;
+const META_DIARIA = 0;
 let periodoAtual = "dia";
 let dataSelecionada = new Date();
 let historicoChamadas = JSON.parse(localStorage.getItem("historicoChamadas")) || [];
@@ -35,12 +35,23 @@ if (cadastroVeiculoSalvo) {
 }
 
 let regras = JSON.parse(localStorage.getItem("regras")) || {
-  valorKmMin: 1.6,
-  valorHoraMin: 35,
-  kmMax: 25,
-  notaMin: 4.1,
-  custoKmPadrao: 1.55
+  valorKmMin: 0,
+  valorHoraMin: 0,
+  kmMax: 0,
+  notaMin: 0,
+  custoKmPadrao: 0
 };
+
+regras = {
+  valorKmMin: 0,
+  valorHoraMin: 0,
+  kmMax: 0,
+  notaMin: 0,
+  custoKmPadrao: 0
+};
+
+localStorage.removeItem("regras");
+
 
 // ===============================
 // UTILITÁRIOS
@@ -151,6 +162,54 @@ function limparCamposVeiculo() {
   if (custoDia) custoDia.textContent = "Custo do dia: -";
   if (lucroDia) lucroDia.textContent = "Lucro real: -";
 }
+
+// ===============================
+// BLOCO 46 — META DINÂMICA
+// MANUTENÇÃO:
+// Permite definir meta por período (dia, semana, mês, ano)
+// e salvar no localStorage.
+// ===============================
+function obterMeta() {
+  const metas = JSON.parse(localStorage.getItem("metas")) || {
+    dia: 0,
+    semana: 0,
+    mes: 0,
+    ano: 0
+  };
+
+  return metas[periodoAtual] || 0;
+}
+
+function salvarMeta(valor) {
+  let metas = JSON.parse(localStorage.getItem("metas")) || {
+    dia: 0,
+    semana: 0,
+    mes: 0,
+    ano: 0
+  };
+
+  metas[periodoAtual] = Number(valor || 0);
+
+  localStorage.setItem("metas", JSON.stringify(metas));
+
+  atualizarDashboard();
+}
+// ===============================
+// BLOCO 48 — DEFINIR META
+// ===============================
+function definirMeta() {
+  const valor = numeroBR(pegarElemento("input-meta")?.value);
+
+  if (!valor || valor <= 0) {
+    alert("Digite uma meta válida.");
+    return;
+  }
+
+  salvarMeta(valor);
+
+  pegarElemento("input-meta").value = "";
+}
+
 // ===============================
 // BLOCO 36.1 — GARRA DO CADASTRO FIXO DO VEÍCULO
 // MANUTENÇÃO: salva automaticamente qualquer alteração
@@ -583,7 +642,7 @@ function calcularResumo() {
 // ===============================
 function atualizarDashboard() {
   const r = calcularResumo();
-  const meta = metaDoPeriodo();
+ const meta = obterMeta();
 
   pegarElemento("faturamento").textContent = moeda(r.faturamento);
   pegarElemento("custos").textContent = moeda(r.custosTotal);
