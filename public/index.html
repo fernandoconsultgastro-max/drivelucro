@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <span>Meta do<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -26,126 +26,131 @@
     </div>
   </div>
 
-<!-- ===============================
-BLOCO 30 — BOTÃO MENU + DRAWER
-MANUTENÇÃO:
-Botão lateral responsável por abrir o menu drawer.
-O JS precisa encontrar os IDs: btn-menu, drawer e overlay.
-=============================== -->
+  <!-- ===============================
+  BLOCO 30 — BOTÃO MENU + DRAWER
+  MANUTENÇÃO:
+  Botão lateral responsável por abrir o menu drawer.
+  =============================== -->
 
-<button id="btn-menu" class="btn-menu" type="button">☰</button>
+  <button id="btn-menu" class="btn-menu" type="button">☰</button>
 
-<div id="overlay" class="overlay"></div>
+  <div id="overlay" class="overlay"></div>
 
-<nav id="drawer" class="drawer">
-  <div class="drawer-header">
-    <h3>DriveLucro</h3>
-    <span>Controle inteligente</span>
-  </div>
-
-  <button class="drawer-item" type="button" data-tela="dashboard">Início</button>
-  <button class="drawer-item" type="button" data-tela="corridas">Corridas</button>
-  <button class="drawer-item" type="button" data-tela="custos">Custos</button>
-  <button class="drawer-item" type="button" data-tela="simulador">Simulador</button>
-  <button class="drawer-item" type="button" data-tela="relatorios">Relatórios</button>
-  <button class="drawer-item" type="button" data-tela="veiculo">Meu Veículo</button>
-</nav>
-
-  <input 
-    id="input-meta" 
-    placeholder="Definir meta (R$)" 
-    style="margin-top:8px;"
-  />
-
-  <button onclick="definirMeta()">Salvar meta</button>
-
-  <p id="meta-info"></p>
-  <div class="barra-meta">
-    <div id="barra-meta"></div>
-  </div>
-  <span id="meta-percentual"></span>
-</div>
-
-<section id="tela-dashboard" class="tela ativa">
-  <h2>Dashboard</h2>
-
-  <div id="desempenho-box"></div>
-
-  <div class="cards">
-    <div class="card card-click" data-acao-card="relatorios">
-      <span>Faturamento</span>
-      <strong id="faturamento">R$ 0,00</strong>
-      <small>Ver relatório</small>
+  <nav id="drawer" class="drawer">
+    <div class="drawer-header">
+      <h3>DriveLucro</h3>
+      <span>Controle inteligente</span>
     </div>
 
-    <div class="card card-click" data-acao-card="custos">
-      <span>Custos</span>
-      <strong id="custos">R$ 0,00</strong>
-      <small>Lançar/ver custos</small>
+    <button class="drawer-item" type="button" data-tela="dashboard">Início</button>
+    <button class="drawer-item" type="button" data-tela="corridas">Corridas</button>
+    <button class="drawer-item" type="button" data-tela="custos">Custos</button>
+    <button class="drawer-item" type="button" data-tela="simulador">Simulador</button>
+    <button class="drawer-item" type="button" data-tela="relatorios">Relatórios</button>
+    <button class="drawer-item" type="button" data-tela="veiculo">Meu Veículo</button>
+  </nav>
+
+  <header class="topo">
+    <h1>Drive<span>Lucro</span></h1>
+    <p>Controle financeiro para motoristas</p>
+  </header>
+
+  <main class="container">
+
+    <div class="periodo-box">
+      <button class="periodo-btn ativo" data-periodo="dia">Dia</button>
+      <button class="periodo-btn" data-periodo="semana">Semana</button>
+      <button class="periodo-btn" data-periodo="mes">Mês</button>
+      <button class="periodo-btn" data-periodo="ano">Ano</button>
     </div>
 
-    <div class="card card-click" id="card-lucro" data-acao-card="relatorios">
-      <span>Lucro</span>
-      <strong id="lucro">R$ 0,00</strong>
-      <small>Resultado real</small>
+    <div class="controle-data">
+      <button id="btn-dia-anterior" type="button">←</button>
+      <input type="date" id="data-selecionada">
+      <button id="btn-proximo-dia" type="button">→</button>
     </div>
 
-    <div class="card card-click" data-acao-card="corridas">
-      <span>Km</span>
-      <strong id="km-total">0.0 km</strong>
-      <small>Ver corridas</small>
-    </div>
+    <!-- DASHBOARD -->
+    <section id="tela-dashboard" class="tela ativa">
+      <h2>Dashboard</h2>
 
-    <div class="card card-click" id="card-custo-km" data-acao-card="simulador">
-      <span>Valor/km</span>
-      <strong id="valor-km">R$ 0,00</strong>
-      <small>Simular chamada</small>
-    </div>
+      <div id="desempenho-box"></div>
 
-    <div class="card card-click" id="card-valor-hora" data-acao-card="simulador">
-      <span>Valor/hora</span>
-      <strong id="valor-hora">R$ 0,00</strong>
-      <small>Analisar tempo</small>
-    </div>
-  </div>
+      <div class="cards">
+        <div class="card card-click" data-acao-card="relatorios">
+          <span>Faturamento</span>
+          <strong id="faturamento">R$ 0,00</strong>
+          <small>Ver relatório</small>
+        </div>
 
-  <div class="meta-box">
-    <h3>Meta do período</h3>
+        <div class="card card-click" data-acao-card="custos">
+          <span>Custos</span>
+          <strong id="custos">R$ 0,00</strong>
+          <small>Lançar/ver custos</small>
+        </div>
 
-    <input id="input-meta" placeholder="Definir meta (R$)">
-    <button onclick="definirMeta()">Salvar meta</button>
+        <div class="card card-click" id="card-lucro" data-acao-card="relatorios">
+          <span>Lucro</span>
+          <strong id="lucro">R$ 0,00</strong>
+          <small>Resultado real</small>
+        </div>
 
-    <p id="meta-info">Defina uma meta para este período.</p>
+        <div class="card card-click" data-acao-card="corridas">
+          <span>Km</span>
+          <strong id="km-total">0.0 km</strong>
+          <small>Ver corridas</small>
+        </div>
 
-    <div class="barra-meta">
-      <div id="barra-meta"></div>
-    </div>
+        <div class="card card-click" id="card-custo-km" data-acao-card="simulador">
+          <span>Valor/km</span>
+          <strong id="valor-km">R$ 0,00</strong>
+          <small>Simular chamada</small>
+        </div>
 
-    <strong id="meta-percentual">0%</strong>
-  </div>
+        <div class="card card-click" id="card-valor-hora" data-acao-card="simulador">
+          <span>Valor/hora</span>
+          <strong id="valor-hora">R$ 0,00</strong>
+          <small>Analisar tempo</small>
+        </div>
+      </div>
 
-  <div class="diagnostico-box">
-    <h3>Diagnóstico</h3>
-    <p id="diagnostico-texto">Você ainda não iniciou o período. Comece a rodar.</p>
-  </div>
+      <div class="meta-box">
+        <h3>Meta do período</h3>
 
-  <div class="grafico-box">
-    <h3>Desempenho</h3>
-    <canvas id="grafico-financeiro"></canvas>
-  </div>
+        <input id="input-meta" placeholder="Definir meta (R$)" inputmode="decimal">
+        <button type="button" onclick="definirMeta()">Salvar meta</button>
 
-  <div class="grafico-box">
-    <h3>Evolução do período</h3>
-    <canvas id="grafico-evolucao"></canvas>
-  </div>
+        <p id="meta-info">Defina uma meta para este período.</p>
 
-  <div class="diagnostico-box">
-    <h3>Previsão</h3>
-    <p id="previsao-texto">Ainda não há dados suficientes para prever o fechamento.</p>
-  </div>
-</section>
+        <div class="barra-meta">
+          <div id="barra-meta"></div>
+        </div>
 
-<!-- CORRIDAS -->
+        <strong id="meta-percentual">0%</strong>
+      </div>
+
+      <div class="diagnostico-box">
+        <h3>Diagnóstico</h3>
+        <p id="diagnostico-texto">Você ainda não iniciou o período. Comece a rodar.</p>
+      </div>
+
+      <div class="grafico-box">
+        <h3>Desempenho</h3>
+        <canvas id="grafico-financeiro"></canvas>
+      </div>
+
+      <div class="grafico-box">
+        <h3>Evolução do período</h3>
+        <canvas id="grafico-evolucao"></canvas>
+      </div>
+
+      <div class="diagnostico-box">
+        <h3>Previsão</h3>
+        <p id="previsao-texto">Ainda não há dados suficientes para prever o fechamento.</p>
+      </div>
+    </section>
+
+    <!-- CORRIDAS -->
 <section id="tela-corridas" class="tela">
   <h2>Corridas</h2>
 

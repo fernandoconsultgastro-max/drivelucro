@@ -596,9 +596,13 @@ function calcularResumo() {
 
   const km = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
   const tempo = corridasPeriodo.reduce((t, c) => t + Number(c.tempo || 0), 0);
-
-  // 🔥 NOVO: custo real do veículo
-  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 1.55;
+// ===============================
+// BLOCO 19 — CUSTO/KM REAL
+// MANUTENÇÃO:
+// Não usa mais valor padrão fixo.
+// Só mostra custo/km se o motorista configurar o veículo.
+// ===============================
+  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0;
   const custoRodagem = km * custoKm;
 
   // 🔥 NOVO: custo total real
@@ -975,7 +979,7 @@ function configurarParserChamada() {
       custoKmInput.value =
         tipoCorrida === "particular"
           ? String(regras.custoKmPadrao || 1.55).replace(".", ",")
-          : "1,55";
+          : "0";
     }
 
     const formSimulador = pegarElemento("form-simulador");
@@ -1197,7 +1201,9 @@ function aplicarCustoAutomaticoSimulador() {
     campoCustoKm.style.opacity = "0.6";
   } else {
     // fallback para padrão
-    campoCustoKm.value = String(regras.custoKmPadrao || 1.55).replace(".", ",");
+   campoCustoKm.value = regras.custoKmPadrao > 0
+  ? String(regras.custoKmPadrao).replace(".", ",")
+  : "";
   }
 }
 
