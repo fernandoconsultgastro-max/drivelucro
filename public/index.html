@@ -26,11 +26,30 @@
     </div>
   </div>
 
-<!-- BLOCO 30 — BOTÃO MENU -->
-<button id="btn-menu" class="btn-menu">☰</button>
-<div class="card">
- <div class="card">
-  <span>Meta do período</span>
+<!-- ===============================
+BLOCO 30 — BOTÃO MENU + DRAWER
+MANUTENÇÃO:
+Botão lateral responsável por abrir o menu drawer.
+O JS precisa encontrar os IDs: btn-menu, drawer e overlay.
+=============================== -->
+
+<button id="btn-menu" class="btn-menu" type="button">☰</button>
+
+<div id="overlay" class="overlay"></div>
+
+<nav id="drawer" class="drawer">
+  <div class="drawer-header">
+    <h3>DriveLucro</h3>
+    <span>Controle inteligente</span>
+  </div>
+
+  <button class="drawer-item" type="button" data-tela="dashboard">Início</button>
+  <button class="drawer-item" type="button" data-tela="corridas">Corridas</button>
+  <button class="drawer-item" type="button" data-tela="custos">Custos</button>
+  <button class="drawer-item" type="button" data-tela="simulador">Simulador</button>
+  <button class="drawer-item" type="button" data-tela="relatorios">Relatórios</button>
+  <button class="drawer-item" type="button" data-tela="veiculo">Meu Veículo</button>
+</nav>
 
   <input 
     id="input-meta" 
