@@ -629,12 +629,25 @@ function atualizarDashboard() {
   const r = calcularResumo();
  const meta = obterMeta();
 
-  pegarElemento("faturamento").textContent = moeda(r.faturamento);
-  pegarElemento("custos").textContent = moeda(r.custosTotal);
-  pegarElemento("lucro").textContent = moeda(r.lucro);
-  pegarElemento("km-total").textContent = `${r.km.toFixed(1)} km`;
-  pegarElemento("valor-km").textContent = moeda(r.valorKm);
-  pegarElemento("valor-hora").textContent = moeda(r.valorHora);
+// ===============================
+// BLOCO 20 — DASHBOARD SEGURO
+// MANUTENÇÃO:
+// Atualiza os cards apenas se os elementos existirem no HTML.
+// Evita quebra geral da interface.
+// ===============================
+const elFaturamento = pegarElemento("faturamento");
+const elCustos = pegarElemento("custos");
+const elLucro = pegarElemento("lucro");
+const elKmTotal = pegarElemento("km-total");
+const elValorKm = pegarElemento("valor-km");
+const elValorHora = pegarElemento("valor-hora");
+
+if (elFaturamento) elFaturamento.textContent = moeda(r.faturamento);
+if (elCustos) elCustos.textContent = moeda(r.custosTotal);
+if (elLucro) elLucro.textContent = moeda(r.lucro);
+if (elKmTotal) elKmTotal.textContent = `${r.km.toFixed(1)} km`;
+if (elValorKm) elValorKm.textContent = moeda(r.valorKm);
+if (elValorHora) elValorHora.textContent = moeda(r.valorHora);
 
  // BLOCO DESEMPENHO
 const desempenho = calcularDesempenho();
