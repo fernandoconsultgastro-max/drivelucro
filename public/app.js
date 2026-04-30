@@ -1596,6 +1596,107 @@ function atualizarGrafico() {
   ctx.fillStyle = "#94a3b8";
   ctx.fillText(`Resultado: ${moeda(lucro)}`, centroX, centroY + 36);
 }
+
+// ===============================
+// BLOCO PREMIUM 04 — EVOLUÇÃO INTELIGENTE
+// MANUTENÇÃO:
+// Cria um painel de evolução simples e seguro.
+// Mostra faturamento acumulado por dia no período selecionado.
+// ===============================
+function atualizarGraficoEvolucao() {
+  const canvas = pegarElemento("grafico-evolucao");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const corridasPeriodo = filtrarPorPeriodo(corridas);
+
+  canvas.width = canvas.parentElement.clientWidth - 24;
+  canvas.height = 240;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!corridasPeriodo.length) {
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "bold 14px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText("Sem dados para evolução", canvas.width / 2, 120);
+    return;
+  }
+
+  const agrupado = {};
+
+  corridasPeriodo.forEach(corrida => {
+    const data = corrida.data || dataHoje();
+
+    if (!agrupado[data]) agrupado[data] = 0;
+    agrupado[data] += Number(corrida.valor || 0);
+  });
+
+  const valores = Object.values(agrupado);
+  const labels = Object.keys(agrupado);
+
+  const maior = Math.max(...valores, 1);
+  const padding = 34;
+  const baseY = canvas.height - 42;
+  const alturaMax = canvas.height - 90;
+  const larguraUtil = canvas.width - padding * 2;
+
+  ctx.strokeStyle = "rgba(124,252,0,0.18)";
+  ctx.lineWidth = 1;
+
+  for (let i = 0; i < 4; i++) {
+    const y = baseY - (alturaMax / 3) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding, y);
+    ctx.lineTo(canvas.width - padding, y);
+    ctx.stroke();
+  }
+
+  const pontos = valores.map((valor, index) => {
+    const x = valores.length === 1
+      ? canvas.width / 2
+      : padding + (index * larguraUtil) / (valores.length - 1);
+
+    const y = baseY - (valor / maior) * alturaMax;
+
+    return { x, y, valor, label: labels[index] };
+  });
+
+  const grad = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  grad.addColorStop(0, "#7CFC00");
+  grad.addColorStop(1, "#22c55e");
+
+  ctx.beginPath();
+  pontos.forEach((p, i) => {
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  });
+
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = "#7CFC00";
+  ctx.shadowBlur = 10;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  pontos.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = "#7CFC00";
+    ctx.fill();
+
+    ctx.fillStyle = "#f8fafc";
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(moeda(p.valor), p.x, p.y - 12);
+  });
+
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "11px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText("Evolução do faturamento por período", canvas.width / 2, canvas.height - 12);
+}
+
 // ===============================
 // PREVISÃO
 // ===============================
