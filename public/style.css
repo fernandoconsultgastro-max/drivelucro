@@ -670,3 +670,78 @@ ANIMAÇÃO DE CLIQUE (SUAVE)
   border-radius: 14px;
   padding: 0;
 }
+
+/* ===============================
+BLOCO PREMIUM 01 — ESTILO DASHBOARD
+MANUTENÇÃO:
+Transforma layout em padrão premium (nível app real)
+=============================== */
+
+.premium-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.premium-card {
+  padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #0a1a2f, #0c223a);
+  border: 1px solid rgba(124,252,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.premium-card span {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.premium-card strong {
+  font-size: 22px;
+  display: block;
+  margin-top: 6px;
+}
+
+.premium-card small {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.premium-card:hover {
+  transform: scale(1.02);
+  border: 1px solid #7CFC00;
+}
+
+.destaque-lucro {
+  grid-column: span 2;
+  background: linear-gradient(145deg, #0f2d1f, #071f17);
+  border: 1px solid rgba(124,252,0,0.3);
+}
+
+/* META */
+.premium-meta {
+  margin-top: 20px;
+}
+
+/* DIAGNÓSTICO */
+.premium-diagnostico {
+  margin-top: 16px;
+  border-left: 4px solid #7CFC00;
+}
+
+/* VELOCÍMETRO */
+.premium-velocimetro {
+  margin-top: 20px;
+  background: radial-gradient(circle at center, #071f17, #020617);
+}
+
+/* EVOLUÇÃO */
+.premium-evolucao {
+  margin-top: 16px;
+}
+
+/* PREVISÃO */
+.premium-previsao {
+  margin-top: 16px;
+  border-left: 4px solid #22c55e;
+}

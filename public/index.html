@@ -58,10 +58,10 @@
   <main class="container">
 
     <div class="periodo-box">
-      <button class="periodo-btn ativo" data-periodo="dia">Dia</button>
-      <button class="periodo-btn" data-periodo="semana">Semana</button>
-      <button class="periodo-btn" data-periodo="mes">Mês</button>
-      <button class="periodo-btn" data-periodo="ano">Ano</button>
+      <button class="periodo-btn ativo" type="button" data-periodo="dia">Dia</button>
+      <button class="periodo-btn" type="button" data-periodo="semana">Semana</button>
+      <button class="periodo-btn" type="button" data-periodo="mes">Mês</button>
+      <button class="periodo-btn" type="button" data-periodo="ano">Ano</button>
     </div>
 
     <div class="controle-data">
@@ -69,85 +69,126 @@
       <input type="date" id="data-selecionada">
       <button id="btn-proximo-dia" type="button">→</button>
     </div>
+<!-- ===============================
+BLOCO PREMIUM 01 — DASHBOARD
+MANUTENÇÃO:
+Dashboard redesenhado estilo app premium (nível Gigu+)
+Foco: leitura rápida, decisão e impacto visual
+=============================== -->
 
-    <!-- DASHBOARD -->
-    <section id="tela-dashboard" class="tela ativa">
-      <h2>Dashboard</h2>
+<section id="tela-dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
 
-      <div id="desempenho-box"></div>
+  <!-- 🔥 DESTAQUE PRINCIPAL -->
+  <div id="desempenho-box"></div>
 
-      <div class="cards">
-        <div class="card card-click" data-acao-card="relatorios">
-          <span>Faturamento</span>
-          <strong id="faturamento">R$ 0,00</strong>
-          <small>Ver relatório</small>
-        </div>
+  <!-- 🔥 GRID PRINCIPAL -->
+  <div class="cards premium-grid">
 
-        <div class="card card-click" data-acao-card="custos">
-          <span>Custos</span>
-          <strong id="custos">R$ 0,00</strong>
-          <small>Lançar/ver custos</small>
-        </div>
+    <div class="card premium-card card-click" data-acao-card="relatorios">
+      <span>Faturamento</span>
+      <strong id="faturamento">R$ 0,00</strong>
+      <small>Receita total</small>
+    </div>
 
-        <div class="card card-click" id="card-lucro" data-acao-card="relatorios">
-          <span>Lucro</span>
-          <strong id="lucro">R$ 0,00</strong>
-          <small>Resultado real</small>
-        </div>
+    <div class="card premium-card card-click" data-acao-card="custos">
+      <span>Custos</span>
+      <strong id="custos">R$ 0,00</strong>
+      <small>Despesas do período</small>
+    </div>
 
-        <div class="card card-click" data-acao-card="corridas">
-          <span>Km</span>
-          <strong id="km-total">0.0 km</strong>
-          <small>Ver corridas</small>
-        </div>
+    <div class="card premium-card destaque-lucro card-click" id="card-lucro" data-acao-card="relatorios">
+      <span>Lucro real</span>
+      <strong id="lucro">R$ 0,00</strong>
+      <small>Resultado líquido</small>
+    </div>
 
-        <div class="card card-click" id="card-custo-km" data-acao-card="simulador">
-          <span>Valor/km</span>
-          <strong id="valor-km">R$ 0,00</strong>
-          <small>Simular chamada</small>
-        </div>
+    <div class="card premium-card card-click" data-acao-card="corridas">
+      <span>Km rodado</span>
+      <strong id="km-total">0.0 km</strong>
+      <small>Distância total</small>
+    </div>
 
-        <div class="card card-click" id="card-valor-hora" data-acao-card="simulador">
-          <span>Valor/hora</span>
-          <strong id="valor-hora">R$ 0,00</strong>
-          <small>Analisar tempo</small>
-        </div>
-      </div>
+    <div class="card premium-card" id="card-custo-km">
+      <span>Custo/km</span>
+      <strong id="valor-km">R$ 0,00</strong>
+      <small>Base do veículo</small>
+    </div>
 
-      <div class="meta-box">
-        <h3>Meta do período</h3>
+    <div class="card premium-card" id="card-valor-hora">
+      <span>Valor/hora</span>
+      <strong id="valor-hora">R$ 0,00</strong>
+      <small>Eficiência</small>
+    </div>
 
-        <input id="input-meta" placeholder="Definir meta (R$)" inputmode="decimal">
-        <button type="button" onclick="definirMeta()">Salvar meta</button>
+  </div>
 
-        <p id="meta-info">Defina uma meta para este período.</p>
+  <!-- 🔥 META (REPOSICIONADA E LIMPA) -->
+  <div class="meta-box premium-meta">
+    <h3>Meta do período</h3>
 
-        <div class="barra-meta">
-          <div id="barra-meta"></div>
-        </div>
+    <input id="input-meta" placeholder="Definir meta (R$)" inputmode="decimal">
 
-        <strong id="meta-percentual">0%</strong>
-      </div>
+    <button type="button" onclick="definirMeta()">
+      Salvar meta
+    </button>
 
-      <div class="diagnostico-box">
-        <h3>Diagnóstico</h3>
-        <p id="diagnostico-texto">Você ainda não iniciou o período. Comece a rodar.</p>
-      </div>
+    <p id="meta-info">Defina uma meta para este período.</p>
 
-      <div class="grafico-box">
-        <h3>Desempenho</h3>
-        <canvas id="grafico-financeiro"></canvas>
-      </div>
+    <div class="barra-meta">
+      <div id="barra-meta"></div>
+    </div>
 
-      <div class="grafico-box">
-        <h3>Evolução do período</h3>
-        <canvas id="grafico-evolucao"></canvas>
-      </div>
+    <strong id="meta-percentual">0%</strong>
+  </div>
 
-      <div class="diagnostico-box">
-        <h3>Previsão</h3>
-        <p id="previsao-texto">Ainda não há dados suficientes para prever o fechamento.</p>
-      </div>
+  <!-- 🔥 DIAGNÓSTICO INTELIGENTE -->
+  <div class="diagnostico-box premium-diagnostico">
+    <h3>Diagnóstico</h3>
+    <p id="diagnostico-texto">Aguardando dados...</p>
+  </div>
+
+  <!-- 🔥 VELOCÍMETRO (SUBSTITUI GRÁFICO) -->
+  <div class="grafico-box premium-velocimetro">
+    <h3>Desempenho</h3>
+    <canvas id="grafico-financeiro"></canvas>
+  </div>
+
+  <!-- 🔥 EVOLUÇÃO -->
+  <div class="grafico-box premium-evolucao">
+    <h3>Evolução do período</h3>
+    <canvas id="grafico-evolucao"></canvas>
+  </div>
+
+  <!-- 🔥 PREVISÃO -->
+  <div class="diagnostico-box premium-previsao">
+    <h3>Previsão</h3>
+    <p id="previsao-texto">Calculando...</p>
+  </div>
+
+</section>
+
+    <!-- CORRIDAS -->
+    <section id="tela-corridas" class="tela">
+      <h2>Corridas</h2>
+
+      <form id="form-corrida">
+        <select id="corrida-app">
+          <option value="Uber">Uber</option>
+          <option value="99">99</option>
+          <option value="InDrive">InDrive</option>
+          <option value="Particular">Particular</option>
+        </select>
+
+        <input type="date" id="corrida-data">
+        <input type="text" id="corrida-valor" placeholder="Valor R$" inputmode="decimal">
+        <input type="text" id="corrida-km" placeholder="Km" inputmode="decimal">
+        <input type="text" id="corrida-tempo" placeholder="Tempo (min)" inputmode="numeric">
+
+        <button type="submit">Salvar corrida</button>
+      </form>
+
+      <div id="lista-corridas"></div>
     </section>
 
     <!-- CORRIDAS -->
@@ -353,7 +394,7 @@
 
   <!-- JS -->
 
-<script src="app.js?v=125"></script>
+<script src="app.js?v=130"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js")
