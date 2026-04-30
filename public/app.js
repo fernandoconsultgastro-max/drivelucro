@@ -1761,36 +1761,35 @@ document.addEventListener("DOMContentLoaded", init);
 
 // ===============================
 // BLOCO 30 — CONTROLE DRAWER
+// MANUTENÇÃO:
+// Abre e fecha o menu lateral.
+// Usa os IDs obrigatórios: btn-menu, drawer e overlay.
 // ===============================
-
 function configurarDrawer() {
   const btnMenu = pegarElemento("btn-menu");
   const drawer = pegarElemento("drawer");
   const overlay = pegarElemento("overlay");
 
-  if (!btnMenu || !drawer || !overlay) return;
+  if (!btnMenu || !drawer || !overlay) {
+    console.warn("Drawer não iniciado: btn-menu, drawer ou overlay não encontrado.");
+    return;
+  }
 
-  // Abrir menu
   btnMenu.addEventListener("click", () => {
-    drawer.classList.add("ativo");
-    overlay.classList.add("ativo");
+    drawer.classList.toggle("ativo");
+    overlay.classList.toggle("ativo");
   });
 
-  // Fechar menu
   overlay.addEventListener("click", () => {
     drawer.classList.remove("ativo");
     overlay.classList.remove("ativo");
   });
 
-  // 🔥 TROCA DE TELA (AQUI É O PROBLEMA)
   document.querySelectorAll(".drawer-item").forEach(btn => {
     btn.addEventListener("click", () => {
-      const tela = btn.getAttribute("data-tela");
+      const tela = btn.dataset.tela;
 
-      if (tela) {
-        console.log("Abrindo tela:", tela); // DEBUG
-        abrirTela(tela);
-      }
+      if (tela) abrirTela(tela);
 
       drawer.classList.remove("ativo");
       overlay.classList.remove("ativo");
