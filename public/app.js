@@ -543,7 +543,7 @@ if (desempenho) {
 
   if (box) {
     box.innerHTML = `
-      <div class="card destaque">
+     <div class="card ${desempenho.lucro >= 0 ? "status-positivo" : "status-negativo"}">
         <span>Meu desempenho</span>
         <strong>${moeda(desempenho.lucro)}</strong>
         <small>${desempenho.lucro >= 0 ? "Lucro real" : "Prejuízo real"}</small>
