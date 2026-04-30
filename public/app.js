@@ -1439,7 +1439,13 @@ function desenharBarraArredondada(ctx, x, y, largura, altura, raio) {
   ctx.closePath();
   ctx.fill();
 }
-
+// ===============================
+// BLOCO PREMIUM 02 — VELOCÍMETRO DE DESEMPENHO
+// MANUTENÇÃO:
+// Substitui o gráfico comum por um velocímetro estilo painel de carro.
+// Mede desempenho com base no lucro real do período.
+// Vermelho = prejuízo | Amarelo = atenção | Verde = lucro.
+// ===============================
 function atualizarGrafico() {
   const canvas = pegarElemento("grafico-financeiro");
   if (!canvas) return;
@@ -1448,146 +1454,106 @@ function atualizarGrafico() {
   const r = calcularResumo();
 
   canvas.width = canvas.parentElement.clientWidth - 24;
-  canvas.height = 240;
+  canvas.height = 260;
 
-  const dados = [
-    { label: "Faturamento", valor: r.faturamento, cor: "#7CFC00" },
-    { label: "Custos", valor: r.custosTotal, cor: "#f97316" },
-    { label: "Lucro", valor: r.lucro, cor: r.lucro >= 0 ? "#7CFC00" : "#ef4444" }
-  ];
+  const centroX = canvas.width / 2;
+  const centroY = 185;
+  const raio = Math.min(canvas.width / 2 - 35, 105);
 
-  const maior = Math.max(...dados.map(d => Math.abs(d.valor)), 1);
+  const lucro = Number(r.lucro || 0);
+  const faturamento = Number(r.faturamento || 0);
 
-  let progresso = 0;
+  let desempenho = 0;
 
-  function animar() {
-    progresso += 0.05;
-    if (progresso > 1) progresso = 1;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const baseY = 180;
-    const alturaMax = 120;
-    const larguraBarra = Math.min(60, canvas.width / 5);
-    const espaco = (canvas.width - larguraBarra * 3) / 4;
-
-    dados.forEach((dado, index) => {
-      const x = espaco + index * (larguraBarra + espaco);
-      const alturaFinal = (Math.abs(dado.valor) / maior) * alturaMax;
-      const altura = alturaFinal * progresso;
-      const y = baseY - altura;
-
-      const grad = ctx.createLinearGradient(0, y, 0, baseY);
-      grad.addColorStop(0, dado.cor);
-      grad.addColorStop(1, "rgba(255,255,255,0.2)");
-
-      ctx.fillStyle = grad;
-      ctx.shadowColor = dado.cor;
-      ctx.shadowBlur = 15;
-
-      ctx.fillRect(x, y, larguraBarra, altura);
-
-      ctx.shadowBlur = 0;
-
-      if (progresso === 1) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(moeda(dado.valor), x + larguraBarra / 2, y - 10);
-
-        ctx.fillStyle = "#94a3b8";
-        ctx.fillText(dado.label, x + larguraBarra / 2, baseY + 20);
-      }
-    });
-
-    if (progresso < 1) requestAnimationFrame(animar);
+  if (faturamento > 0) {
+    desempenho = Math.max(0, Math.min(100, ((lucro / faturamento) * 100) + 50));
   }
 
-  animar();
-}
+  const anguloInicio = Math.PI;
+  const anguloFim = 2 * Math.PI;
+  const anguloAtual = anguloInicio + (desempenho / 100) * Math.PI;
 
-function atualizarGraficoEvolucao() {
-  const canvas = pegarElemento("grafico-evolucao");
-  if (!canvas) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const ctx = canvas.getContext("2d");
+  // Fundo do painel
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, raio + 18, Math.PI, 2 * Math.PI);
+  ctx.lineWidth = 22;
+  ctx.strokeStyle = "rgba(255,255,255,0.05)";
+  ctx.stroke();
 
-  canvas.width = canvas.parentElement.clientWidth - 24;
-  canvas.height = 240;
+  // Zona vermelha
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, raio, Math.PI, Math.PI * 1.33);
+  ctx.lineWidth = 18;
+  ctx.strokeStyle = "#ef4444";
+  ctx.stroke();
 
-  const corridasPeriodo = filtrarPorPeriodo(corridas);
-  const agrupado = {};
+  // Zona amarela
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, raio, Math.PI * 1.33, Math.PI * 1.66);
+  ctx.lineWidth = 18;
+  ctx.strokeStyle = "#facc15";
+  ctx.stroke();
 
-  corridasPeriodo.forEach(c => {
-    if (!agrupado[c.data]) agrupado[c.data] = 0;
-    agrupado[c.data] += Number(c.valor || 0);
-  });
+  // Zona verde
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, raio, Math.PI * 1.66, Math.PI * 2);
+  ctx.lineWidth = 18;
+  ctx.strokeStyle = "#7CFC00";
+  ctx.stroke();
 
-  const labels = Object.keys(agrupado);
-  const valores = Object.values(agrupado);
-
-  if (!valores.length) return;
-
-  const maior = Math.max(...valores, 1);
-
-  let progresso = 0;
-
-  function animarLinha() {
-    progresso += 0.05;
-    if (progresso > 1) progresso = 1;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const padding = 40;
-    const baseY = 180;
-    const alturaMax = 120;
-    const larguraUtil = canvas.width - padding * 2;
-
-    const pontos = valores.map((valor, index) => {
-      const x = valores.length === 1
-        ? canvas.width / 2
-        : padding + (index * larguraUtil) / (valores.length - 1);
-
-      const yFinal = baseY - (valor / maior) * alturaMax;
-      const y = baseY - (baseY - yFinal) * progresso;
-
-      return { x, y, valor };
-    });
+  // Marcas
+  for (let i = 0; i <= 10; i++) {
+    const ang = Math.PI + (i / 10) * Math.PI;
+    const x1 = centroX + Math.cos(ang) * (raio - 18);
+    const y1 = centroY + Math.sin(ang) * (raio - 18);
+    const x2 = centroX + Math.cos(ang) * (raio - 4);
+    const y2 = centroY + Math.sin(ang) * (raio - 4);
 
     ctx.beginPath();
-    pontos.forEach((p, i) => {
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
-    });
-
-    ctx.strokeStyle = "#7CFC00";
-    ctx.lineWidth = 4;
-    ctx.shadowColor = "#7CFC00";
-    ctx.shadowBlur = 10;
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.45)";
     ctx.stroke();
-
-    ctx.shadowBlur = 0;
-
-    if (progresso === 1) {
-      pontos.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
-        ctx.fillStyle = "#7CFC00";
-        ctx.fill();
-
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 12px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(moeda(p.valor), p.x, p.y - 12);
-      });
-    }
-
-    if (progresso < 1) requestAnimationFrame(animarLinha);
   }
 
-  animarLinha();
-}
+  // Ponteiro
+  const ponteiroX = centroX + Math.cos(anguloAtual) * (raio - 28);
+  const ponteiroY = centroY + Math.sin(anguloAtual) * (raio - 28);
 
+  ctx.beginPath();
+  ctx.moveTo(centroX, centroY);
+  ctx.lineTo(ponteiroX, ponteiroY);
+  ctx.lineWidth = 5;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = lucro >= 0 ? "#7CFC00" : "#ef4444";
+  ctx.shadowColor = lucro >= 0 ? "#7CFC00" : "#ef4444";
+  ctx.shadowBlur = 12;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Centro
+  ctx.beginPath();
+  ctx.arc(centroX, centroY, 10, 0, Math.PI * 2);
+  ctx.fillStyle = "#f8fafc";
+  ctx.fill();
+
+  // Texto principal
+  ctx.fillStyle = "#f8fafc";
+  ctx.font = "bold 24px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(`${Math.round(desempenho)}%`, centroX, centroY - 56);
+
+  ctx.font = "bold 14px Arial";
+  ctx.fillStyle = lucro >= 0 ? "#7CFC00" : "#ef4444";
+  ctx.fillText(lucro >= 0 ? "LUCRO" : "PREJUÍZO", centroX, centroY - 32);
+
+  ctx.font = "13px Arial";
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillText(`Resultado: ${moeda(lucro)}`, centroX, centroY + 36);
+}
 // ===============================
 // PREVISÃO
 // ===============================

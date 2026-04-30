@@ -745,3 +745,24 @@ Transforma layout em padrão premium (nível app real)
   margin-top: 16px;
   border-left: 4px solid #22c55e;
 }
+
+/* ===============================
+   BLOCO PREMIUM 02 — VELOCÍMETRO
+   MANUTENÇÃO:
+   Ajusta o canvas para parecer painel automotivo.
+=============================== */
+
+.premium-velocimetro,
+.grafico-box {
+  position: relative;
+}
+
+#grafico-financeiro {
+  width: 100%;
+  height: 260px;
+  display: block;
+  background:
+    radial-gradient(circle at center, rgba(124,252,0,.08), transparent 45%),
+    linear-gradient(180deg, #07111b, #020409);
+  border-radius: 22px;
+}
