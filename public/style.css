@@ -616,3 +616,57 @@ ANIMAÇÃO DE CLIQUE (SUAVE)
 .overlay.ativo {
   display: block;
 }
+
+/* ===============================
+   BLOCO 31 — CORREÇÃO META + MENU
+   MANUTENÇÃO:
+   Corrige o botão "Salvar meta" dentro do card
+   e mantém o botão menu fixo sem invadir o layout.
+=============================== */
+
+.meta-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta-box input {
+  width: 100%;
+  height: 48px;
+}
+
+.meta-box button {
+  width: 100%;
+  height: 48px;
+  position: relative;
+  top: auto;
+  left: auto;
+  margin: 0;
+  display: block;
+}
+
+.meta-box p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.meta-box .barra-meta {
+  margin: 6px 0;
+}
+
+#meta-percentual {
+  display: block;
+  margin-top: 4px;
+}
+
+/* Botão menu fixo e separado dos botões comuns */
+.btn-menu {
+  position: fixed;
+  top: 16px;
+  left: 14px;
+  z-index: 1100;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  padding: 0;
+}
