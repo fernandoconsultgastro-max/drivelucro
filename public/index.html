@@ -190,30 +190,7 @@ Foco: leitura rápida, decisão e impacto visual
 
       <div id="lista-corridas"></div>
     </section>
-
-    <!-- CORRIDAS -->
-<section id="tela-corridas" class="tela">
-  <h2>Corridas</h2>
-
-  <form id="form-corrida">
-    <select id="corrida-app">
-      <option value="Uber">Uber</option>
-      <option value="99">99</option>
-      <option value="InDrive">InDrive</option>
-      <option value="Particular">Particular</option>
-    </select>
-
-    <input type="date" id="corrida-data">
-    <input type="text" id="corrida-valor" placeholder="Valor R$" inputmode="decimal">
-    <input type="text" id="corrida-km" placeholder="Km" inputmode="decimal">
-    <input type="text" id="corrida-tempo" placeholder="Tempo (min)" inputmode="numeric">
-
-    <button type="submit">Salvar corrida</button>
-  </form>
-
-  <div id="lista-corridas"></div>
-</section>
-
+    
  <!-- CUSTOS -->
 <section id="tela-custos" class="tela">
   <h2>Custos variáveis</h2>
@@ -394,7 +371,7 @@ Foco: leitura rápida, decisão e impacto visual
 
   <!-- JS -->
 
-<script src="app.js?v=134"></script>
+<script src="app.js?v=135"></script>
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/service-worker.js")

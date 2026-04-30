@@ -1027,8 +1027,6 @@ function configurarParserChamada() {
 
     const formSimulador = pegarElemento("form-simulador");
     formSimulador.dispatchEvent(new Event("submit"));
-    
-    const copiloto = gerarCopilotoInteligente(valor, km, tempo, nota);
 
     setTimeout(() => {
       const appCorrida = pegarElemento("sim-app")?.value || "Uber";
@@ -1197,9 +1195,12 @@ function aplicarCustoAutomaticoSimulador() {
   }
 }
 
-  // ===============================
-  // SCORE DA CORRIDA
-  // ===============================
+// ===============================
+// BLOCO PREMIUM 03 — SIMULADOR COM SEMÁFORO
+// MANUTENÇÃO:
+// Um único botão: Analisar.
+// Renderiza apenas o card semáforo premium.
+// ===============================
 function configurarSimulador() {
   aplicarCustoAutomaticoSimulador();
 
@@ -1214,30 +1215,35 @@ function configurarSimulador() {
     const tipoCorrida = pegarElemento("sim-tipo-corrida")?.value || "app";
     const appCorrida = pegarElemento("sim-app")?.value || "Uber";
 
-    const valor = numeroBR(pegarElemento("sim-valor").value);
-    const km = numeroBR(pegarElemento("sim-km").value);
-    const tempo = numeroBR(pegarElemento("sim-tempo").value);
-
-    let custoKm = numeroBR(pegarElemento("sim-custo-km").value);
-
-    if (tipoCorrida === "particular") {
-      custoKm = Number(regras.custoKmPadrao || 1.55);
-    }
-
+    const valor = numeroBR(pegarElemento("sim-valor")?.value);
+    const km = numeroBR(pegarElemento("sim-km")?.value);
+    const tempo = numeroBR(pegarElemento("sim-tempo")?.value);
     const notaPassageiro = numeroBR(pegarElemento("sim-nota")?.value || 5);
 
-    if (!valor || !km || !tempo || !custoKm) {
-      alert("Preencha valor, km, tempo e custo/km.");
+    let custoKm = numeroBR(pegarElemento("sim-custo-km")?.value);
+
+    if (!custoKm || custoKm <= 0) {
+      custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+    }
+
+    if (tipoCorrida === "particular") {
+      custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+    }
+
+    if (!valor || !km || !tempo) {
+      alert("Preencha valor, km e tempo.");
+      return;
+    }
+
+    if (!custoKm || custoKm <= 0) {
+      alert("Configure primeiro o custo/km em Meu Veículo.");
       return;
     }
 
     const resultado = analisarChamada(valor, km, tempo, custoKm, notaPassageiro);
-    const copiloto = gerarCopilotoInteligente(valor, km, tempo, notaPassageiro);
 
     resultado.tipoCorrida = tipoCorrida;
     resultado.appCorrida = appCorrida;
-
-    box.className = `resultado ${resultado.tipo}`;
 
     const decisaoRapida = pegarElemento("decisao-rapida");
 
@@ -1246,58 +1252,46 @@ function configurarSimulador() {
       decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}/100`;
     }
 
-box.innerHTML = `
-  <div class="semaforo-card ${resultado.tipo}">
-    
-    <div class="semaforo-decisao">
-      ${resultado.decisao}
-    </div>
-
-    <div class="semaforo-score">
-      Score ${resultado.score}/100
-    </div>
-
-    <div class="semaforo-grid">
-      
-      <div>
-        <span>R$/km</span>
-        <strong>${moeda(resultado.valorKm)}</strong>
-      </div>
-
-      <div>
-        <span>R$/hora</span>
-        <strong>${moeda(resultado.valorHora)}</strong>
-      </div>
-
-      <div>
-        <span>Custo</span>
-        <strong>${moeda(resultado.custoEstimado)}</strong>
-      </div>
-
-      <div>
-        <span>Lucro</span>
-        <strong>${moeda(resultado.lucroEstimado)}</strong>
-      </div>
-
-    </div>
-
-    <p style="margin-top:10px; font-size:13px; color:#94a3b8;">
-      ${resultado.motivo}
-    </p>
-
-  </div>
-  
-      <p>${resultado.motivo}</p>
-
-      <p><strong>Valor/km:</strong> ${moeda(resultado.valorKm)}</p>
-      <p><strong>Valor/hora:</strong> ${moeda(resultado.valorHora)}</p>
-      <p><strong>Valor/min:</strong> ${moeda(resultado.valorMinuto)}</p>
-      <p><strong>Custo/km usado:</strong> ${moeda(custoKm)}</p>
-      <p><strong>Custo:</strong> ${moeda(resultado.custoEstimado)}</p>
-      <p><strong>Lucro:</strong> ${moeda(resultado.lucroEstimado)}</p>
-    `;
-
+    box.className = `resultado ${resultado.tipo}`;
     box.classList.remove("oculto");
+
+    box.innerHTML = `
+      <div class="semaforo-card ${resultado.tipo}">
+        <div class="semaforo-decisao">
+          ${resultado.decisao}
+        </div>
+
+        <div class="semaforo-score">
+          Score ${resultado.score}/100
+        </div>
+
+        <div class="semaforo-grid">
+          <div>
+            <span>R$/km</span>
+            <strong>${moeda(resultado.valorKm)}</strong>
+          </div>
+
+          <div>
+            <span>R$/hora</span>
+            <strong>${moeda(resultado.valorHora)}</strong>
+          </div>
+
+          <div>
+            <span>Custo</span>
+            <strong>${moeda(resultado.custoEstimado)}</strong>
+          </div>
+
+          <div>
+            <span>Lucro</span>
+            <strong>${moeda(resultado.lucroEstimado)}</strong>
+          </div>
+        </div>
+
+        <p class="semaforo-motivo">
+          ${resultado.motivo}
+        </p>
+      </div>
+    `;
   });
 }
 
@@ -1912,23 +1906,6 @@ function controlarCamposCombustivel() {
 
   atualizar(); // inicializa
 }
-
-// ===============================
-// LIMPEZA CONTROLADA DO STORAGE
-// MANUTENÇÃO:
-// Remove somente dados do DriveLucro, sem quebrar PWA/cache.
-// ===============================
-localStorage.removeItem("corridas");
-localStorage.removeItem("custos");
-localStorage.removeItem("historicoChamadas");
-localStorage.removeItem("historicoVeiculo");
-localStorage.removeItem("dadosVeiculo");
-localStorage.removeItem("cadastroVeiculoFixo");
-localStorage.removeItem("fechamentos");
-localStorage.removeItem("fechamentoDia");
-localStorage.removeItem("metas");
-localStorage.removeItem("regras");
-
 
 // ===============================
 // BLOCO 40 — FECHAMENTO REAL DO DIA
