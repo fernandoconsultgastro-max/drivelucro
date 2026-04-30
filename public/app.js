@@ -42,17 +42,6 @@ let regras = JSON.parse(localStorage.getItem("regras")) || {
   custoKmPadrao: 0
 };
 
-regras = {
-  valorKmMin: 0,
-  valorHoraMin: 0,
-  kmMax: 0,
-  notaMin: 0,
-  custoKmPadrao: 0
-};
-
-localStorage.removeItem("regras");
-
-
 // ===============================
 // UTILITÁRIOS
 // ===============================
@@ -99,10 +88,6 @@ function atualizarInputData() {
 function salvar() {
   localStorage.setItem("corridas", JSON.stringify(corridas));
   localStorage.setItem("custos", JSON.stringify(custos));
-}
-
-function pegarElemento(id) {
-  return document.getElementById(id);
 }
 
 function pegarElemento(id) {
@@ -673,15 +658,35 @@ if (desempenho) {
     `;
   }
 }
-
+// ===============================
+// BLOCO 21 — META DO PERÍODO
+// MANUTENÇÃO:
+// Atualiza a meta somente se os elementos existirem.
+// Evita quebra da interface quando algum ID não estiver no HTML.
+// ===============================
 const faltam = meta - r.faturamento;
-const percentual = Math.min((r.faturamento / meta) * 100, 100);
+const percentual = meta > 0
+  ? Math.min((r.faturamento / meta) * 100, 100)
+  : 0;
 
-pegarElemento("meta-info").textContent =
-  faltam > 0 ? `Faltam ${moeda(faltam)}` : "Meta batida";
+const metaInfo = pegarElemento("meta-info");
+const metaPercentual = pegarElemento("meta-percentual");
+const barraMeta = pegarElemento("barra-meta");
 
-pegarElemento("meta-percentual").textContent = `${percentual.toFixed(0)}%`;
-pegarElemento("barra-meta").style.width = `${percentual}%`;
+if (metaInfo) {
+  metaInfo.textContent =
+    meta > 0
+      ? (faltam > 0 ? `Faltam ${moeda(faltam)}` : "Meta batida")
+      : "Defina uma meta para este período.";
+}
+
+if (metaPercentual) {
+  metaPercentual.textContent = `${percentual.toFixed(0)}%`;
+}
+
+if (barraMeta) {
+  barraMeta.style.width = `${percentual}%`;
+}
 
 atualizarRelatorios(r);
 aplicarStatusVisual(r);
@@ -690,7 +695,6 @@ atualizarGrafico();
 atualizarGraficoEvolucao();
 atualizarPrevisao();
 atualizarRelatorioAnual();
-atualizarDashboardComFechamento();
 }
 
 function atualizarDiagnostico(r, meta) {
@@ -1815,29 +1819,22 @@ function controlarCamposCombustivel() {
   atualizar(); // inicializa
 }
 
-function atualizarDashboardComFechamento() {
-  const fechamento = JSON.parse(localStorage.getItem("fechamentoDia"));
+// ===============================
+// LIMPEZA CONTROLADA DO STORAGE
+// MANUTENÇÃO:
+// Remove somente dados do DriveLucro, sem quebrar PWA/cache.
+// ===============================
+localStorage.removeItem("corridas");
+localStorage.removeItem("custos");
+localStorage.removeItem("historicoChamadas");
+localStorage.removeItem("historicoVeiculo");
+localStorage.removeItem("dadosVeiculo");
+localStorage.removeItem("cadastroVeiculoFixo");
+localStorage.removeItem("fechamentos");
+localStorage.removeItem("fechamentoDia");
+localStorage.removeItem("metas");
+localStorage.removeItem("regras");
 
-  if (!fechamento) return;
-
-  const box = pegarElemento("desempenho-box");
-
-  if (!box) return;
-
-  const classeStatus = fechamento.lucroReal >= 0
-    ? "status-positivo"
-    : "status-negativo";
-
-  box.innerHTML = `
-    <div class="card ${classeStatus}">
-      <span>Resultado real do período</span>
-      <strong>${moeda(fechamento.lucroReal)}</strong>
-      <small>
-        ${fechamento.lucroReal >= 0 ? "Lucro real" : "Prejuízo real"} • Baseado no KM real do veículo
-      </small>
-    </div>
-  `;
-}
 
 // ===============================
 // BLOCO 40 — FECHAMENTO REAL DO DIA
