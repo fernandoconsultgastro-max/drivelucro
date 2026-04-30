@@ -535,6 +535,23 @@ function atualizarDashboard() {
   pegarElemento("valor-km").textContent = moeda(r.valorKm);
   pegarElemento("valor-hora").textContent = moeda(r.valorHora);
 
+ // BLOCO DESEMPENHO
+const desempenho = calcularDesempenho();
+
+if (desempenho) {
+  const box = pegarElemento("desempenho-box");
+
+  if (box) {
+    box.innerHTML = `
+      <div class="card destaque">
+        <span>Meu desempenho</span>
+        <strong>${moeda(desempenho.lucro)}</strong>
+        <small>${desempenho.lucro >= 0 ? "Lucro real" : "Prejuízo real"}</small>
+      </div>
+    `;
+  }
+}
+
   const faltam = meta - r.faturamento;
   const percentual = Math.min((r.faturamento / meta) * 100, 100);
 
@@ -1630,7 +1647,6 @@ function calcularFechamentoDia() {
   pegarElemento("custo-dia").innerText = `Custo do dia: R$ ${custoTotal.toFixed(2)}`;
   pegarElemento("lucro-dia").innerText = `Lucro real: R$ ${lucro.toFixed(2)}`;
 }
-
 // ===============================
 // BLOCO 40 — FECHAMENTO REAL DO DIA
 // ===============================
@@ -1648,7 +1664,7 @@ function calcularFechamentoDia() {
   const custoKmReal = dadosVeiculo?.custoKmReal || 0;
 
   if (!custoKmReal) {
-    alert("Configure primeiro o custo/km em Meu Veículo.");
+    alert("Configure o custo/km em Meu Veículo.");
     return;
   }
 
@@ -1659,10 +1675,61 @@ function calcularFechamentoDia() {
     `KM rodado: ${kmRodadoReal.toFixed(1)} km`;
 
   pegarElemento("custo-dia").textContent =
-    `Custo real do dia: ${moeda(custoRealDia)}`;
+    `Custo do dia: ${moeda(custoRealDia)}`;
 
   const lucroEl = pegarElemento("lucro-dia");
   lucroEl.textContent = `Lucro real: ${moeda(lucroRealDia)}`;
-
   lucroEl.style.color = lucroRealDia >= 0 ? "#7CFC00" : "#ef4444";
+
+  salvarFechamentoDia(kmInicial, kmFinal, {
+    custo: custoRealDia,
+    lucro: lucroRealDia
+  });
+
+  atualizarDashboard();
+}
+
+// ===============================
+// BLOCO 41 — SALVAR FECHAMENTO REAL
+// ===============================
+function salvarFechamentoDia(kmInicial, kmFinal, resultado) {
+  let fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
+
+  const data = dataHoje();
+
+  fechamentos = fechamentos.filter(f => f.data !== data);
+
+  fechamentos.push({
+    data,
+    kmInicial,
+    kmFinal,
+    kmRodado: kmFinal - kmInicial,
+    custoDia: resultado.custo,
+    lucroDia: resultado.lucro
+  });
+
+  localStorage.setItem("fechamentos", JSON.stringify(fechamentos));
+}
+
+// ===============================
+// BLOCO 42 — MEU DESEMPENHO
+// ===============================
+function calcularDesempenho() {
+  const fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
+
+  if (!fechamentos.length) return null;
+
+  const periodo = filtrarPorPeriodo(fechamentos);
+
+  if (!periodo.length) return null;
+
+  const totalKm = periodo.reduce((acc, f) => acc + Number(f.kmRodado || 0), 0);
+  const totalCusto = periodo.reduce((acc, f) => acc + Number(f.custoDia || 0), 0);
+  const totalLucro = periodo.reduce((acc, f) => acc + Number(f.lucroDia || 0), 0);
+
+  return {
+    km: totalKm,
+    custo: totalCusto,
+    lucro: totalLucro
+  };
 }
