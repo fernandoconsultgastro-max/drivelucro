@@ -7,7 +7,7 @@ let corridas = JSON.parse(localStorage.getItem("corridas")) || [];
 let custos = JSON.parse(localStorage.getItem("custos")) || [];
 
 const META_DIARIA = 300;
-let periodoAtual = "mes";
+let periodoAtual = "dia";
 let dataSelecionada = new Date();
 let historicoChamadas = JSON.parse(localStorage.getItem("historicoChamadas")) || [];
 let historicoVeiculo = JSON.parse(localStorage.getItem("historicoVeiculo")) || [];
@@ -94,6 +94,63 @@ function pegarElemento(id) {
   return document.getElementById(id);
 }
 
+function pegarElemento(id) {
+  return document.getElementById(id);
+}
+
+function moeda(v) {
+  return `R$ ${Number(v || 0).toFixed(2)}`;
+}
+
+
+// ===============================
+// BLOCO 44 — LIMPAR CAMPOS VISUAIS
+// MANUTENÇÃO:
+// Remove dados fantasmas da interface após reset.
+// ===============================
+function limparCamposVeiculo() {
+  const ids = [
+    "veiculo-parcela",
+    "veiculo-seguro",
+    "veiculo-ipva",
+    "veiculo-manutencao",
+    "veiculo-oleo",
+    "veiculo-pneus",
+    "veiculo-lavagem",
+    "veiculo-telefone",
+    "veiculo-outros",
+    "veiculo-km-mensal",
+    "veiculo-preco-gasolina",
+    "veiculo-consumo-gasolina",
+    "veiculo-preco-etanol",
+    "veiculo-consumo-etanol",
+    "sim-custo-km",
+    "km-inicial",
+    "km-final"
+  ];
+
+  ids.forEach(id => {
+    const el = pegarElemento(id);
+    if (el) el.value = "";
+  });
+
+  const resultadoVeiculo = pegarElemento("resultado-custo-veiculo");
+  if (resultadoVeiculo) resultadoVeiculo.textContent = "Custo total/km: R$ 0,00";
+
+  const desempenhoBox = pegarElemento("desempenho-box");
+  if (desempenhoBox) desempenhoBox.innerHTML = "";
+
+  const historicoVeiculoBox = pegarElemento("historico-veiculo");
+  if (historicoVeiculoBox) historicoVeiculoBox.innerHTML = "<p>Nenhum cálculo registrado ainda.</p>";
+
+  const kmRodadoDia = pegarElemento("km-rodado-dia");
+  const custoDia = pegarElemento("custo-dia");
+  const lucroDia = pegarElemento("lucro-dia");
+
+  if (kmRodadoDia) kmRodadoDia.textContent = "KM rodado: -";
+  if (custoDia) custoDia.textContent = "Custo do dia: -";
+  if (lucroDia) lucroDia.textContent = "Lucro real: -";
+}
 // ===============================
 // BLOCO 36.1 — GARRA DO CADASTRO FIXO DO VEÍCULO
 // MANUTENÇÃO: salva automaticamente qualquer alteração
@@ -542,32 +599,39 @@ if (desempenho) {
   const box = pegarElemento("desempenho-box");
 
   if (box) {
+    const classeStatus = desempenho.lucro >= 0
+      ? "status-positivo"
+      : "status-negativo";
+
     box.innerHTML = `
-     <div class="card ${desempenho.lucro >= 0 ? "status-positivo" : "status-negativo"}">
-        <span>Meu desempenho</span>
+      <div class="card ${classeStatus}">
+        <span>Resultado real do período</span>
         <strong>${moeda(desempenho.lucro)}</strong>
-        <small>${desempenho.lucro >= 0 ? "Lucro real" : "Prejuízo real"}</small>
+        <small>
+          ${desempenho.lucro >= 0 ? "Lucro real" : "Prejuízo real"} • Baseado no KM real do veículo
+        </small>
       </div>
     `;
   }
 }
 
-  const faltam = meta - r.faturamento;
-  const percentual = Math.min((r.faturamento / meta) * 100, 100);
+const faltam = meta - r.faturamento;
+const percentual = Math.min((r.faturamento / meta) * 100, 100);
 
-  pegarElemento("meta-info").textContent =
-    faltam > 0 ? `Faltam ${moeda(faltam)}` : "Meta batida";
+pegarElemento("meta-info").textContent =
+  faltam > 0 ? `Faltam ${moeda(faltam)}` : "Meta batida";
 
-  pegarElemento("meta-percentual").textContent = `${percentual.toFixed(0)}%`;
-  pegarElemento("barra-meta").style.width = `${percentual}%`;
+pegarElemento("meta-percentual").textContent = `${percentual.toFixed(0)}%`;
+pegarElemento("barra-meta").style.width = `${percentual}%`;
 
-  atualizarRelatorios(r);
-  aplicarStatusVisual(r);
-  atualizarDiagnostico(r, meta);
-  atualizarGrafico();
-  atualizarGraficoEvolucao();
-  atualizarPrevisao();
-  atualizarRelatorioAnual();
+atualizarRelatorios(r);
+aplicarStatusVisual(r);
+atualizarDiagnostico(r, meta);
+atualizarGrafico();
+atualizarGraficoEvolucao();
+atualizarPrevisao();
+atualizarRelatorioAnual();
+atualizarDashboardComFechamento();
 }
 
 function atualizarDiagnostico(r, meta) {
@@ -885,6 +949,43 @@ function configurarParserChamada() {
 }
 
 // ===============================
+// BLOCO 46 — COPILOTO INTELIGENTE
+// ===============================
+function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
+  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 1.55;
+
+  const valorKm = km > 0 ? valor / km : 0;
+  const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
+  const custoEstimado = km * custoKm;
+  const lucroEstimado = valor - custoEstimado;
+
+  let decisao = "RECUSAR";
+  let classe = "recusar";
+  let motivo = "Corrida abaixo do custo real do veículo.";
+
+  if (valorKm >= custoKm * 2 && valorHora >= regras.valorHoraMin && lucroEstimado > 0) {
+    decisao = "ACEITAR";
+    classe = "aceitar";
+    motivo = "Corrida lucrativa pelo custo real do veículo.";
+  } else if (valorKm >= custoKm * 1.4 && lucroEstimado > 0) {
+    decisao = "ANALISAR";
+    classe = "analisar";
+    motivo = "Corrida pode valer a pena dependendo da região e retorno.";
+  }
+
+  return {
+    decisao,
+    classe,
+    motivo,
+    custoKm,
+    valorKm,
+    valorHora,
+    custoEstimado,
+    lucroEstimado
+  };
+}
+
+// ===============================
 // SIMULADOR — BLOCO 25 REGRAS DO MOTORISTA
 // ===============================
 function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
@@ -1059,6 +1160,7 @@ function configurarSimulador() {
     }
 
     const resultado = analisarChamada(valor, km, tempo, custoKm, notaPassageiro);
+    const copiloto = gerarCopilotoInteligente(valor, km, tempo, notaPassageiro);
 
     resultado.tipoCorrida = tipoCorrida;
     resultado.appCorrida = appCorrida;
@@ -1078,6 +1180,12 @@ function configurarSimulador() {
       <p><strong>Tipo:</strong> ${
         tipoCorrida === "particular" ? "Particular" : appCorrida
       }</p>
+
+            <div class="decisao-rapida ${copiloto.classe}">
+        ${copiloto.decisao} — Copiloto Inteligente
+      </div>
+
+      <p><strong>Análise do copiloto:</strong> ${copiloto.motivo}</p>
 
       <div class="score-box">
         <span>Score da corrida</span>
@@ -1101,43 +1209,78 @@ function configurarSimulador() {
     box.classList.remove("oculto");
   });
 }
-// ===============================
-// RELATÓRIOS
+
+// BLOCO 43 — RESET PROFISSIONAL
+// MANUTENÇÃO:
+// Limpa completamente o sistema:
+// corridas, custos, veículo, histórico, fechamentos e cache.
 // ===============================
 function configurarRelatorios() {
-  pegarElemento("btn-exportar").addEventListener("click", () => {
-    let csv = "TIPO,DATA,CATEGORIA_APP,VALOR,KM,TEMPO\n";
+  const btnExportar = pegarElemento("btn-exportar");
+  const btnLimpar = pegarElemento("btn-limpar-dados");
 
-    corridas.forEach(c => {
-      csv += `CORRIDA,${c.data},${c.app},${c.valor},${c.km},${c.tempo}\n`;
+  if (btnExportar) {
+    btnExportar.addEventListener("click", () => {
+      let csv = "TIPO,DATA,CATEGORIA_APP,VALOR,KM,TEMPO\n";
+
+      corridas.forEach(c => {
+        csv += `CORRIDA,${c.data},${c.app},${c.valor},${c.km},${c.tempo}\n`;
+      });
+
+      custos.forEach(c => {
+        csv += `CUSTO,${c.data},${c.categoria},${c.valor},,\n`;
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "relatorio-drivelucro.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
     });
+  }
 
-    custos.forEach(c => {
-      csv += `CUSTO,${c.data},${c.categoria},${c.valor},,\n`;
+  if (btnLimpar) {
+    btnLimpar.addEventListener("click", () => {
+      const confirmar = confirm(
+        "Resetar o DriveLucro?\n\nIsso apagará TODOS os dados."
+      );
+
+      if (!confirmar) return;
+
+      // Dados principais
+      corridas = [];
+      custos = [];
+      historicoChamadas = [];
+      historicoVeiculo = [];
+
+      // Veículo
+      dadosVeiculo = {
+        custosFixos: 0,
+        kmMensal: 0,
+        combustivel: "Gasolina",
+        valorAbastecido: 0,
+        litros: 0,
+        kmRodado: 0,
+        custoKmReal: 0
+      };
+
+      // 🔥 LIMPEZA TOTAL DO STORAGE
+      localStorage.clear();
+
+      // 🔥 LIMPEZA DE CAMPOS VISUAIS
+      limparCamposVeiculo();
+
+      renderizar();
+      atualizarDashboard();
+      abrirTela("dashboard");
+
+      alert("Sistema resetado com sucesso.");
     });
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "relatorio-drivelucro.csv";
-    link.click();
-
-    URL.revokeObjectURL(url);
-  });
-
-  pegarElemento("btn-limpar-dados").addEventListener("click", () => {
-    const confirmar = confirm("Tem certeza que deseja apagar todos os dados?");
-    if (!confirmar) return;
-
-    corridas = [];
-    custos = [];
-
-    salvar();
-    renderizar();
-    atualizarDashboard();
-  });
+  }
 }
 
 // ===============================
@@ -1612,43 +1755,37 @@ function controlarCamposCombustivel() {
 
   atualizar(); // inicializa
 }
-// ===============================
-// BLOCO 40 — FECHAMENTO REAL DO DIA
-// ===============================
-function calcularFechamentoDia() {
 
-  const kmInicial = parseFloat(pegarElemento("km-inicial")?.value?.replace(",", ".") || 0);
-  const kmFinal = parseFloat(pegarElemento("km-final")?.value?.replace(",", ".") || 0);
+function atualizarDashboardComFechamento() {
+  const fechamento = JSON.parse(localStorage.getItem("fechamentoDia"));
 
-  if (!kmInicial || !kmFinal || kmFinal <= kmInicial) {
-    alert("Preencha KM inicial e final corretamente.");
-    return;
-  }
+  if (!fechamento) return;
 
-  const kmRodado = kmFinal - kmInicial;
+  const box = pegarElemento("desempenho-box");
 
-  const dadosVeiculo = JSON.parse(localStorage.getItem("dadosVeiculo")) || {};
-  const custoKm = dadosVeiculo.custoKmReal || 0;
+  if (!box) return;
 
-  const corridas = JSON.parse(localStorage.getItem("corridas")) || [];
-  const custos = JSON.parse(localStorage.getItem("custos")) || [];
+  const classeStatus = fechamento.lucroReal >= 0
+    ? "status-positivo"
+    : "status-negativo";
 
-  // faturamento do dia
-  const faturamento = corridas.reduce((total, c) => total + Number(c.valor || 0), 0);
-
-  // custos variáveis
-  const custosVariaveis = custos.reduce((total, c) => total + Number(c.valor || 0), 0);
-
-  const custoTotal = kmRodado * custoKm;
-
-  const lucro = faturamento - custoTotal - custosVariaveis;
-
-  pegarElemento("km-rodado-dia").innerText = `KM rodado: ${kmRodado.toFixed(1)} km`;
-  pegarElemento("custo-dia").innerText = `Custo do dia: R$ ${custoTotal.toFixed(2)}`;
-  pegarElemento("lucro-dia").innerText = `Lucro real: R$ ${lucro.toFixed(2)}`;
+  box.innerHTML = `
+    <div class="card ${classeStatus}">
+      <span>Resultado real do período</span>
+      <strong>${moeda(fechamento.lucroReal)}</strong>
+      <small>
+        ${fechamento.lucroReal >= 0 ? "Lucro real" : "Prejuízo real"} • Baseado no KM real do veículo
+      </small>
+    </div>
+  `;
 }
+
 // ===============================
 // BLOCO 40 — FECHAMENTO REAL DO DIA
+// MANUTENÇÃO:
+// Calcula o lucro real usando o KM real do odômetro.
+// Fórmula:
+// lucro real = faturamento - custos variáveis - custo real do carro.
 // ===============================
 function calcularFechamentoDia() {
   const kmInicial = numeroBR(pegarElemento("km-inicial")?.value);
@@ -1664,7 +1801,7 @@ function calcularFechamentoDia() {
   const custoKmReal = dadosVeiculo?.custoKmReal || 0;
 
   if (!custoKmReal) {
-    alert("Configure o custo/km em Meu Veículo.");
+    alert("Configure primeiro o custo/km em Meu Veículo.");
     return;
   }
 
@@ -1688,9 +1825,11 @@ function calcularFechamentoDia() {
 
   atualizarDashboard();
 }
-
 // ===============================
 // BLOCO 41 — SALVAR FECHAMENTO REAL
+// MANUTENÇÃO:
+// Salva um único fechamento por dia.
+// Se já existir fechamento na mesma data, substitui pelo mais recente.
 // ===============================
 function salvarFechamentoDia(kmInicial, kmFinal, resultado) {
   let fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
@@ -1713,6 +1852,9 @@ function salvarFechamentoDia(kmInicial, kmFinal, resultado) {
 
 // ===============================
 // BLOCO 42 — MEU DESEMPENHO
+// MANUTENÇÃO:
+// Lê os fechamentos salvos e soma conforme o filtro ativo:
+// dia, semana, mês ou ano.
 // ===============================
 function calcularDesempenho() {
   const fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
