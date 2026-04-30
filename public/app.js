@@ -1111,108 +1111,54 @@ function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
 }
 
 // ===============================
-// SIMULADOR — BLOCO 25 REGRAS DO MOTORISTA
+// BLOCO PREMIUM 03.1 — MOTOR DE DECISÃO DO SIMULADOR
+// MANUTENÇÃO:
+// Unifica o cálculo da corrida.
+// Fórmula:
+// valor/km = valor / km
+// valor/hora = valor / (tempo / 60)
+// lucro = valor - (km * custoKm)
 // ===============================
 function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
-  const custoEstimado = km * custoKm;
-  const lucroEstimado = valor - custoEstimado;
   const valorKm = km > 0 ? valor / km : 0;
   const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
-  const valorMinuto = tempo > 0 ? valor / tempo : 0;
-
-  if (valorKm < regras.valorKmMin) {
-    return {
-      decisao: "RECUSAR",
-      tipo: "recusar",
-      motivo: `Abaixo do valor mínimo por km definido: ${moeda(regras.valorKmMin)}.`,
-      score: 0,
-      custoEstimado,
-      lucroEstimado,
-      valorKm,
-      valorHora,
-      valorMinuto
-    };
-  }
-
-  if (valorHora < regras.valorHoraMin) {
-    return {
-      decisao: "RECUSAR",
-      tipo: "recusar",
-      motivo: `Abaixo do valor mínimo por hora definido: ${moeda(regras.valorHoraMin)}.`,
-      score: 0,
-      custoEstimado,
-      lucroEstimado,
-      valorKm,
-      valorHora,
-      valorMinuto
-    };
-  }
-
-  if (km > regras.kmMax) {
-    return {
-      decisao: "RECUSAR",
-      tipo: "recusar",
-      motivo: `Distância acima do limite definido: ${regras.kmMax} km.`,
-      score: 0,
-      custoEstimado,
-      lucroEstimado,
-      valorKm,
-      valorHora,
-      valorMinuto
-    };
-  }
-
-  if (notaPassageiro < regras.notaMin) {
-    return {
-      decisao: "RECUSAR",
-      tipo: "recusar",
-      motivo: `Nota do passageiro abaixo do mínimo definido: ${regras.notaMin}.`,
-      score: 0,
-      custoEstimado,
-      lucroEstimado,
-      valorKm,
-      valorHora,
-      valorMinuto
-    };
-  }
-
-  let score = 0;
-
-  if (valorKm >= 2.5) score += 35;
-  else if (valorKm >= 2.0) score += 28;
-  else if (valorKm >= 1.7) score += 18;
-  else if (valorKm >= 1.4) score += 10;
-
-  if (valorHora >= 55) score += 30;
-  else if (valorHora >= 45) score += 24;
-  else if (valorHora >= 35) score += 15;
-  else if (valorHora >= 25) score += 8;
-
-  if (lucroEstimado > 20) score += 25;
-  else if (lucroEstimado > 10) score += 18;
-  else if (lucroEstimado > 0) score += 10;
-
-  if (km <= 5) score += 10;
-  else if (km <= 10) score += 6;
-  else if (km <= 15) score += 3;
-
-  if (notaPassageiro >= 4.9) score += 5;
-  else if (notaPassageiro >= 4.7) score += 3;
-
-  score = Math.min(score, 100);
+  const custoEstimado = km * custoKm;
+  const lucroEstimado = valor - custoEstimado;
 
   let decisao = "RECUSAR";
   let tipo = "recusar";
-  let motivo = "Corrida com baixa eficiência financeira.";
+  let motivo = "Corrida abaixo do padrão mínimo de rentabilidade.";
+  let score = 0;
 
-  if (score >= 75) {
-    decisao = "ACEITAR";
-    tipo = "aceitar";
-    motivo = "Corrida forte. Boa relação entre valor, tempo, distância, nota e lucro.";
-  } else if (score >= 50) {
-    decisao = "ANALISAR";
-    tipo = "analisar";
-    motivo = "Corrida intermediária. Pode valer dependendo da região e do retorno.";
+  if (lucroEstimado <= 0) {
+    motivo = "A corrida gera prejuízo após descontar o custo real/km.";
+  } else {
+    if (valorKm >= custoKm * 2) score += 40;
+    else if (valorKm >= custoKm * 1.5) score += 28;
+    else if (valorKm >= custoKm * 1.2) score += 15;
+
+    if (valorHora >= 60) score += 30;
+    else if (valorHora >= 40) score += 22;
+    else if (valorHora >= 25) score += 12;
+
+    if (lucroEstimado >= 30) score += 20;
+    else if (lucroEstimado >= 15) score += 14;
+    else if (lucroEstimado > 0) score += 8;
+
+    if (notaPassageiro >= 4.8) score += 10;
+    else if (notaPassageiro >= 4.5) score += 5;
+
+    score = Math.min(score, 100);
+
+    if (score >= 75) {
+      decisao = "ACEITAR";
+      tipo = "aceitar";
+      motivo = "Boa corrida: valor/km, valor/hora e lucro estão fortes.";
+    } else if (score >= 45) {
+      decisao = "ANALISAR";
+      tipo = "analisar";
+      motivo = "Corrida intermediária. Avalie região, retorno e horário.";
+    }
   }
 
   return {
@@ -1224,10 +1170,9 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
     lucroEstimado,
     valorKm,
     valorHora,
-    valorMinuto
+    valorMinuto: tempo > 0 ? valor / tempo : 0
   };
 }
-
 // ===============================
 // BLOCO 32 — INTEGRAR CUSTO AO SIMULADOR
 // ===============================
@@ -1301,25 +1246,47 @@ function configurarSimulador() {
       decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}/100`;
     }
 
-  resultado.innerHTML = `
-  <div class="copiloto-card ${copiloto.classe}">
+box.innerHTML = `
+  <div class="semaforo-card ${resultado.tipo}">
     
-    <div class="copiloto-decisao">
-      ${copiloto.decisao}
+    <div class="semaforo-decisao">
+      ${resultado.decisao}
     </div>
 
-    <div class="copiloto-info">
-      <p><strong>Valor/km:</strong> ${moeda(copiloto.valorKm)}</p>
-      <p><strong>Valor/hora:</strong> ${moeda(copiloto.valorHora)}</p>
-      <p><strong>Lucro estimado:</strong> ${moeda(copiloto.lucro)}</p>
+    <div class="semaforo-score">
+      Score ${resultado.score}/100
     </div>
 
-    <div class="copiloto-motivo">
-      ${copiloto.motivo}
+    <div class="semaforo-grid">
+      
+      <div>
+        <span>R$/km</span>
+        <strong>${moeda(resultado.valorKm)}</strong>
+      </div>
+
+      <div>
+        <span>R$/hora</span>
+        <strong>${moeda(resultado.valorHora)}</strong>
+      </div>
+
+      <div>
+        <span>Custo</span>
+        <strong>${moeda(resultado.custoEstimado)}</strong>
+      </div>
+
+      <div>
+        <span>Lucro</span>
+        <strong>${moeda(resultado.lucroEstimado)}</strong>
+      </div>
+
     </div>
+
+    <p style="margin-top:10px; font-size:13px; color:#94a3b8;">
+      ${resultado.motivo}
+    </p>
 
   </div>
-
+  
       <p>${resultado.motivo}</p>
 
       <p><strong>Valor/km:</strong> ${moeda(resultado.valorKm)}</p>
