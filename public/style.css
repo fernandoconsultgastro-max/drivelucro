@@ -766,3 +766,51 @@ Transforma layout em padrão premium (nível app real)
     linear-gradient(180deg, #07111b, #020409);
   border-radius: 22px;
 }
+/* ===============================
+BLOCO PREMIUM 03 — COPILOTO
+=============================== */
+
+.copiloto-card {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 20px;
+  text-align: center;
+  font-weight: 800;
+  transition: all .3s ease;
+}
+
+.copiloto-decisao {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.copiloto-info p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.copiloto-motivo {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* CORES */
+
+.copiloto-card.aceitar {
+  background: linear-gradient(145deg, #064e3b, #022c22);
+  border: 1px solid #7CFC00;
+  color: #7CFC00;
+}
+
+.copiloto-card.analisar {
+  background: linear-gradient(145deg, #78350f, #451a03);
+  border: 1px solid #facc15;
+  color: #facc15;
+}
+
+.copiloto-card.recusar {
+  background: linear-gradient(145deg, #7f1d1d, #450a0a);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+}
