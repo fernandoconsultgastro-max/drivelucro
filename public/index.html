@@ -47,25 +47,85 @@
   <span id="meta-percentual"></span>
 </div>
 
-      <!-- GRÁFICO -->
-      <div class="grafico-box">
-        <h3>Desempenho</h3>
-        <canvas id="grafico-financeiro"></canvas>
-      </div>
+<section id="tela-dashboard" class="tela ativa">
+  <h2>Dashboard</h2>
 
-      <!-- EVOLUÇÃO -->
-      <div class="grafico-box">
-        <h3>Evolução do período</h3>
-        <canvas id="grafico-evolucao"></canvas>
-      </div>
+  <div id="desempenho-box"></div>
 
-      <!-- PREVISÃO -->
-      <div class="diagnostico-box">
-        <h3>Previsão</h3>
-        <p id="previsao-texto">Calculando...</p>
-      </div>
+  <div class="cards">
+    <div class="card card-click" data-acao-card="relatorios">
+      <span>Faturamento</span>
+      <strong id="faturamento">R$ 0,00</strong>
+      <small>Ver relatório</small>
+    </div>
 
-    </section>
+    <div class="card card-click" data-acao-card="custos">
+      <span>Custos</span>
+      <strong id="custos">R$ 0,00</strong>
+      <small>Lançar/ver custos</small>
+    </div>
+
+    <div class="card card-click" id="card-lucro" data-acao-card="relatorios">
+      <span>Lucro</span>
+      <strong id="lucro">R$ 0,00</strong>
+      <small>Resultado real</small>
+    </div>
+
+    <div class="card card-click" data-acao-card="corridas">
+      <span>Km</span>
+      <strong id="km-total">0.0 km</strong>
+      <small>Ver corridas</small>
+    </div>
+
+    <div class="card card-click" id="card-custo-km" data-acao-card="simulador">
+      <span>Valor/km</span>
+      <strong id="valor-km">R$ 0,00</strong>
+      <small>Simular chamada</small>
+    </div>
+
+    <div class="card card-click" id="card-valor-hora" data-acao-card="simulador">
+      <span>Valor/hora</span>
+      <strong id="valor-hora">R$ 0,00</strong>
+      <small>Analisar tempo</small>
+    </div>
+  </div>
+
+  <div class="meta-box">
+    <h3>Meta do período</h3>
+
+    <input id="input-meta" placeholder="Definir meta (R$)">
+    <button onclick="definirMeta()">Salvar meta</button>
+
+    <p id="meta-info">Defina uma meta para este período.</p>
+
+    <div class="barra-meta">
+      <div id="barra-meta"></div>
+    </div>
+
+    <strong id="meta-percentual">0%</strong>
+  </div>
+
+  <div class="diagnostico-box">
+    <h3>Diagnóstico</h3>
+    <p id="diagnostico-texto">Você ainda não iniciou o período. Comece a rodar.</p>
+  </div>
+
+  <div class="grafico-box">
+    <h3>Desempenho</h3>
+    <canvas id="grafico-financeiro"></canvas>
+  </div>
+
+  <div class="grafico-box">
+    <h3>Evolução do período</h3>
+    <canvas id="grafico-evolucao"></canvas>
+  </div>
+
+  <div class="diagnostico-box">
+    <h3>Previsão</h3>
+    <p id="previsao-texto">Ainda não há dados suficientes para prever o fechamento.</p>
+  </div>
+</section>
+
 <!-- CORRIDAS -->
 <section id="tela-corridas" class="tela">
   <h2>Corridas</h2>
