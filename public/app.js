@@ -1630,3 +1630,39 @@ function calcularFechamentoDia() {
   pegarElemento("custo-dia").innerText = `Custo do dia: R$ ${custoTotal.toFixed(2)}`;
   pegarElemento("lucro-dia").innerText = `Lucro real: R$ ${lucro.toFixed(2)}`;
 }
+
+// ===============================
+// BLOCO 40 — FECHAMENTO REAL DO DIA
+// ===============================
+function calcularFechamentoDia() {
+  const kmInicial = numeroBR(pegarElemento("km-inicial")?.value);
+  const kmFinal = numeroBR(pegarElemento("km-final")?.value);
+
+  if (!kmInicial || !kmFinal || kmFinal <= kmInicial) {
+    alert("Preencha o KM inicial e final corretamente.");
+    return;
+  }
+
+  const resumo = calcularResumo();
+  const kmRodadoReal = kmFinal - kmInicial;
+  const custoKmReal = dadosVeiculo?.custoKmReal || 0;
+
+  if (!custoKmReal) {
+    alert("Configure primeiro o custo/km em Meu Veículo.");
+    return;
+  }
+
+  const custoRealDia = kmRodadoReal * custoKmReal;
+  const lucroRealDia = resumo.faturamento - resumo.custosVariaveis - custoRealDia;
+
+  pegarElemento("km-rodado-dia").textContent =
+    `KM rodado: ${kmRodadoReal.toFixed(1)} km`;
+
+  pegarElemento("custo-dia").textContent =
+    `Custo real do dia: ${moeda(custoRealDia)}`;
+
+  const lucroEl = pegarElemento("lucro-dia");
+  lucroEl.textContent = `Lucro real: ${moeda(lucroRealDia)}`;
+
+  lucroEl.style.color = lucroRealDia >= 0 ? "#7CFC00" : "#ef4444";
+}
