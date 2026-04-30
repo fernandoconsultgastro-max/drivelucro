@@ -98,6 +98,46 @@ function moeda(v) {
   return `R$ ${Number(v || 0).toFixed(2)}`;
 }
 
+// ===============================
+// BLOCO PREMIUM 03 — COPILOTO INTELIGENTE
+// MANUTENÇÃO:
+// Decide automaticamente se vale a corrida.
+// ===============================
+function gerarCopilotoInteligente(valor, km, tempo, nota) {
+  const custoKm = dadosVeiculo?.custoKmReal || 0;
+
+  const valorKm = km > 0 ? valor / km : 0;
+  const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
+  const custoTotal = km * custoKm;
+  const lucro = valor - custoTotal;
+
+  let decisao = "";
+  let classe = "";
+  let motivo = "";
+
+  if (valorKm < custoKm || lucro <= 0) {
+    decisao = "RECUSAR ❌";
+    classe = "recusar";
+    motivo = "Corrida abaixo do custo ou prejuízo.";
+  } else if (valorKm >= custoKm * 2 && valorHora >= 30) {
+    decisao = "ACEITAR ✔";
+    classe = "aceitar";
+    motivo = "Alta rentabilidade.";
+  } else {
+    decisao = "ANALISAR ⚠";
+    classe = "analisar";
+    motivo = "Margem moderada.";
+  }
+
+  return {
+    decisao,
+    classe,
+    motivo,
+    valorKm,
+    valorHora,
+    lucro
+  };
+}
 
 // ===============================
 // BLOCO 44 — LIMPAR CAMPOS VISUAIS
@@ -984,6 +1024,8 @@ function configurarParserChamada() {
 
     const formSimulador = pegarElemento("form-simulador");
     formSimulador.dispatchEvent(new Event("submit"));
+    
+    const copiloto = gerarCopilotoInteligente(valor, km, tempo, nota);
 
     setTimeout(() => {
       const appCorrida = pegarElemento("sim-app")?.value || "Uber";
@@ -991,7 +1033,7 @@ function configurarParserChamada() {
       const km = numeroBR(pegarElemento("sim-km").value);
       const tempo = numeroBR(pegarElemento("sim-tempo").value);
       const custoKm = tipoCorrida === "particular"
-        ? Number(regras.custoKmPadrao || 1.55)
+        ? Number(regras.custoKmPadrao || 0)
         : numeroBR(pegarElemento("sim-custo-km").value);
 
       const nota = numeroBR(pegarElemento("sim-nota")?.value || 5);
@@ -1256,27 +1298,24 @@ function configurarSimulador() {
       decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}/100`;
     }
 
-    box.innerHTML = `
-      <h3>${resultado.decisao}</h3>
+  resultado.innerHTML = `
+  <div class="copiloto-card ${copiloto.classe}">
+    
+    <div class="copiloto-decisao">
+      ${copiloto.decisao}
+    </div>
 
-      <p><strong>Tipo:</strong> ${
-        tipoCorrida === "particular" ? "Particular" : appCorrida
-      }</p>
+    <div class="copiloto-info">
+      <p><strong>Valor/km:</strong> ${moeda(copiloto.valorKm)}</p>
+      <p><strong>Valor/hora:</strong> ${moeda(copiloto.valorHora)}</p>
+      <p><strong>Lucro estimado:</strong> ${moeda(copiloto.lucro)}</p>
+    </div>
 
-            <div class="decisao-rapida ${copiloto.classe}">
-        ${copiloto.decisao} — Copiloto Inteligente
-      </div>
+    <div class="copiloto-motivo">
+      ${copiloto.motivo}
+    </div>
 
-      <p><strong>Análise do copiloto:</strong> ${copiloto.motivo}</p>
-
-      <div class="score-box">
-        <span>Score da corrida</span>
-        <strong>${resultado.score}/100</strong>
-
-        <div class="score-barra">
-          <div style="width: ${resultado.score}%"></div>
-        </div>
-      </div>
+  </div>
 
       <p>${resultado.motivo}</p>
 
