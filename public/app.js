@@ -750,6 +750,9 @@ aplicarStatusVisual(r);
 atualizarDiagnostico(r, meta);
 atualizarGrafico();
 atualizarGraficoEvolucao();
+ if (typeof atualizarGraficoEvolucao === "function") {
+  atualizarGraficoEvolucao();
+}
 atualizarPrevisao();
 atualizarRelatorioAnual();
 }
