@@ -635,13 +635,18 @@ function calcularResumo() {
 // Não usa mais valor padrão fixo.
 // Só mostra custo/km se o motorista configurar o veículo.
 // ===============================
-  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0;
-  const custoRodagem = km * custoKm;
+ const custoKm = dadosVeiculo?.custoKmReal || 0;
 
-  // 🔥 NOVO: custo total real
-  const custoTotal = custosVariaveis + custoRodagem;
+// 🔥 REGRA PROFISSIONAL
+let custoTotal = 0;
 
-  const lucro = faturamento - custoTotal;
+if (custoKm > 0) {
+  // ✔ Usa custo real do veículo (completo)
+  custoTotal = km * custoKm;
+} else {
+  // ✔ Usa custos lançados manualmente
+  custoTotal = custosVariaveis;
+}
 
   return {
     faturamento,
