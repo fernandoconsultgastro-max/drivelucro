@@ -652,7 +652,7 @@ if (custoKm > 0) {
     faturamento,
     custosTotal: custoTotal,
     custosVariaveis,
-    custoRodagem,
+    custoRodagem: custoTotal,
     lucro,
     km,
     tempo,
