@@ -57,6 +57,20 @@ function numeroBR(valor) {
   );
 }
 
+// ===============================
+// NORMALIZADOR DE REGRAS (DECIMAL CORRETO)
+// ===============================
+function numeroRegra(valor) {
+  if (!valor) return 0;
+
+  return Number(
+    String(valor)
+      .replace("R$", "")
+      .replace(/\s/g, "")
+      .replace(",", ".")
+  );
+}
+
 function moeda(v) {
   return Number(v || 0).toLocaleString("pt-BR", {
     style: "currency",
@@ -582,10 +596,10 @@ function configurarRegras() {
 
   [valorKm, valorHora, kmMax, nota].forEach(input => {
     input.addEventListener("change", () => {
-      regras.valorKmMin = numeroBR(valorKm.value);
-      regras.valorHoraMin = numeroBR(valorHora.value);
-      regras.kmMax = numeroBR(kmMax.value);
-      regras.notaMin = numeroBR(nota.value);
+    regras.valorKmMin = numeroRegra(valorKm.value);
+    regras.valorHoraMin = numeroRegra(valorHora.value);
+    regras.kmMax = numeroRegra(kmMax.value);
+    regras.notaMin = numeroRegra(nota.value);
 
       localStorage.setItem("regras", JSON.stringify(regras));
     });
