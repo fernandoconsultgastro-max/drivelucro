@@ -632,37 +632,19 @@ function calcularResumo() {
 // ===============================
 // BLOCO 19 — CUSTO/KM REAL
 // MANUTENÇÃO:
-// Não usa mais valor padrão fixo.
-// Só mostra custo/km se o motorista configurar o veículo.
+// Custo total do período = custos variáveis lançados + custo de rodagem.
+// Custo de rodagem = km rodado no período × custo/km real do veículo.
 // ===============================
- const custoKm = dadosVeiculo?.custoKmReal || 0;
-
-// 🔥 REGRA PROFISSIONAL
-let custoTotal = 0;
-
 const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
 const custoRodagem = km * custoKm;
-
-// Custos lançados manualmente devem aparecer no dashboard
 const custoTotal = custosVariaveis + custoRodagem;
-
-const lucro = faturamento - custoTotal;
-
 const lucro = faturamento - custoTotal;
 
   return {
-    faturamento,
-    custosTotal: custoTotal,
-    custosVariaveis,
-    custoRodagem: custoTotal,
-    lucro,
-    km,
-    tempo,
-    valorKm: km > 0 ? faturamento / km : 0,
-    valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
-    ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
-    custoKm,
-    totalCorridas: corridasPeriodo.length
+custosTotal: custoTotal,
+custosVariaveis,
+custoRodagem,
+lucro,
   };
 }
 
