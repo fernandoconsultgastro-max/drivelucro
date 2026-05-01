@@ -640,13 +640,13 @@ function calcularResumo() {
 // 🔥 REGRA PROFISSIONAL
 let custoTotal = 0;
 
-if (custoKm > 0) {
-  // ✔ Usa custo real do veículo (completo)
-  custoTotal = km * custoKm;
-} else {
-  // ✔ Usa custos lançados manualmente
-  custoTotal = custosVariaveis;
-}
+const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
+const custoRodagem = km * custoKm;
+
+// Custos lançados manualmente devem aparecer no dashboard
+const custoTotal = custosVariaveis + custoRodagem;
+
+const lucro = faturamento - custoTotal;
 
 const lucro = faturamento - custoTotal;
 
