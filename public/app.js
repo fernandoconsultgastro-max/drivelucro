@@ -683,7 +683,7 @@ const elValorHora = pegarElemento("valor-hora");
 
 // 🔒 PROTEÇÃO TOTAL DE DADOS
 const faturamento = Number(r?.faturamento || 0);
-const custosTotal = Number(r?.custosTotal || 0);
+const custosTotal = Number(r?.custosVariaveis || 0);
 const lucro = Number(r?.lucro || 0);
 const km = Number(r?.km || 0);
 const valorKm = Number(r?.valorKm || 0);
