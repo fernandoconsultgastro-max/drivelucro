@@ -696,7 +696,7 @@ const valorHora = Number(r?.valorHora || 0);
 // ===============================
 
 if (elFaturamento) elFaturamento.textContent = moeda(faturamento);
-if (elCustos) elCustos.textContent = moeda(custosTotal);
+if (elCustos) elCustos.textContent = moeda(custoTotal);
 if (elLucro) elLucro.textContent = moeda(lucro);
 if (elKmTotal) elKmTotal.textContent = `${km.toFixed(1)} km`;
 if (elValorKm) elValorKm.textContent = moeda(valorKm);
