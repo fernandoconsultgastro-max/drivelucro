@@ -648,6 +648,8 @@ if (custoKm > 0) {
   custoTotal = custosVariaveis;
 }
 
+const lucro = faturamento - custoTotal;
+
   return {
     faturamento,
     custosTotal: custoTotal,
