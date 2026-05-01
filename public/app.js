@@ -624,30 +624,43 @@ function calcularResumo() {
   const corridasPeriodo = filtrarPorPeriodo(corridas);
   const custosPeriodo = filtrarPorPeriodo(custos);
 
-  const faturamento = corridasPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
-  const custosVariaveis = custosPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
+  const faturamento = corridasPeriodo.reduce((t, c) => {
+    return t + Number(c.valor || 0);
+  }, 0);
 
-  const km = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
-  const tempo = corridasPeriodo.reduce((t, c) => t + Number(c.tempo || 0), 0);
-// ===============================
-// BLOCO 19 — CUSTO/KM REAL
-// MANUTENÇÃO:
-// Custo total do período = custos variáveis lançados + custo de rodagem.
-// Custo de rodagem = km rodado no período × custo/km real do veículo.
-// ===============================
-const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
-const custoRodagem = km * custoKm;
-const custoTotal = custosVariaveis + custoRodagem;
-const lucro = faturamento - custoTotal;
+  const custosVariaveis = custosPeriodo.reduce((t, c) => {
+    return t + Number(c.valor || 0);
+  }, 0);
+
+  const km = corridasPeriodo.reduce((t, c) => {
+    return t + Number(c.km || 0);
+  }, 0);
+
+  const tempo = corridasPeriodo.reduce((t, c) => {
+    return t + Number(c.tempo || 0);
+  }, 0);
+
+  const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
+  const custoRodagem = km > 0 && custoKm > 0 ? km * custoKm : 0;
+
+  const custoTotal = custosVariaveis + custoRodagem;
+  const lucro = faturamento - custoTotal;
 
   return {
-custosTotal: custoTotal,
-custosVariaveis,
-custoRodagem,
-lucro,
+    faturamento,
+    custosTotal: custoTotal,
+    custosVariaveis,
+    custoRodagem,
+    lucro,
+    km,
+    tempo,
+    valorKm: km > 0 ? faturamento / km : 0,
+    valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
+    ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
+    custoKm,
+    totalCorridas: corridasPeriodo.length
   };
 }
-
 // ===============================
 // DASHBOARD
 // ===============================
