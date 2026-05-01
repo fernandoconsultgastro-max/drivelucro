@@ -1114,46 +1114,49 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   const custoEstimado = km * custoKm;
   const lucroEstimado = valor - custoEstimado;
 
-  const regraValorKm = regras.valorKmMin > 0 ? regras.valorKmMin : 1.45;
-  const regraValorHora = regras.valorHoraMin > 0 ? regras.valorHoraMin : 35;
-  const regraKmMax = regras.kmMax > 0 ? regras.kmMax : 25;
-  const regraNota = regras.notaMin > 0 ? regras.notaMin : 4.1;
+  if (!regras.valorKmMin || !regras.valorHoraMin || !regras.kmMax) {
+  return {
+    decisao: "CONFIGURAR",
+    tipo: "alerta",
+    motivo: "Configure suas regras para ativar o simulador."
+  };
+}
+  const regraValorHora = regras.valorHoraMin > 0 ? regras.valorHoraMin : 0;
+  const regraKmMax = regras.kmMax > 0 ? regras.kmMax : Infinity;
+  const regraNota = regras.notaMin > 0 ? regras.notaMin : 0;
 
-  let decisao = "RECUSAR";
-  let tipo = "recusar";
-  let motivo = "Corrida abaixo do padrão mínimo de rentabilidade.";
-  let score = 0;
+  let falhas = 0;
+  let alertas = 0;
 
-  if (lucroEstimado <= 0) {
-    motivo = "A corrida gera prejuízo após descontar o custo real/km.";
-  } else {
-    if (valorKm >= regraValorKm) score += 30;
-    else if (valorKm >= custoKm * 1.5) score += 18;
+  if (lucroEstimado <= 0) falhas++;
+  if (regraValorKm && valorKm < regraValorKm) falhas++;
+  if (regraKmMax !== Infinity && km > regraKmMax) alertas++;
+  if (regraValorHora && valorHora < regraValorHora) alertas++;
+  if (regraNota && notaPassageiro < regraNota) alertas++;
 
-    if (valorHora >= regraValorHora) score += 25;
-    else if (valorHora >= 25) score += 12;
+  let decisao = "ACEITAR";
+  let tipo = "aceitar";
+  let motivo = "Corrida dentro das regras definidas pelo motorista.";
 
-    if (km <= regraKmMax) score += 20;
-    else if (km <= regraKmMax * 1.4) score += 8;
-
-    if (lucroEstimado >= 30) score += 15;
-    else if (lucroEstimado >= 15) score += 10;
-    else if (lucroEstimado > 0) score += 5;
-
-    if (notaPassageiro >= regraNota) score += 10;
-
-    score = Math.min(score, 100);
-
-    if (score >= 80 && km <= regraKmMax && valorKm >= regraValorKm) {
-      decisao = "ACEITAR";
-      tipo = "aceitar";
-      motivo = "Boa corrida: rentabilidade forte dentro das suas regras.";
-    } else if (score >= 45) {
-      decisao = "ANALISAR";
-      tipo = "analisar";
-      motivo = "Corrida intermediária. Avalie região, retorno e horário.";
-    }
+  if (falhas >= 1) {
+    decisao = "RECUSAR";
+    tipo = "recusar";
+    motivo = "Corrida fora das regras mínimas de rentabilidade.";
+  } else if (alertas >= 1) {
+    decisao = "ANALISAR";
+    tipo = "analisar";
+    motivo = "Corrida exige análise: algum critério ficou fora do ideal.";
   }
+
+  const criteriosAtendidos = [
+    lucroEstimado > 0,
+    !regraValorKm || valorKm >= regraValorKm,
+    regraKmMax === Infinity || km <= regraKmMax,
+    !regraValorHora || valorHora >= regraValorHora,
+    !regraNota || notaPassageiro >= regraNota
+  ].filter(Boolean).length;
+
+  const score = Math.round((criteriosAtendidos / 5) * 100);
 
   return {
     decisao,
