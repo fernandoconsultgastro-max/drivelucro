@@ -1143,50 +1143,61 @@ function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
 function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   const valorKm = km > 0 ? valor / km : 0;
   const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
+  const valorMinuto = tempo > 0 ? valor / tempo : 0;
   const custoEstimado = km * custoKm;
   const lucroEstimado = valor - custoEstimado;
 
-  if (!regras.valorKmMin || !regras.valorHoraMin || !regras.kmMax) {
-  return {
-    decisao: "CONFIGURAR",
-    tipo: "alerta",
-    motivo: "Configure suas regras para ativar o simulador."
-  };
-}
-  const regraValorHora = regras.valorHoraMin > 0 ? regras.valorHoraMin : 0;
-  const regraKmMax = regras.kmMax > 0 ? regras.kmMax : Infinity;
-  const regraNota = regras.notaMin > 0 ? regras.notaMin : 0;
+  const regraValorKm = Number(regras.valorKmMin || 0);
+  const regraValorHora = Number(regras.valorHoraMin || 0);
+  const regraKmMax = Number(regras.kmMax || 0);
+  const regraNota = Number(regras.notaMin || 0);
+
+  if (!regraValorKm || !regraValorHora || !regraKmMax) {
+    return {
+      decisao: "CONFIGURAR",
+      tipo: "alerta",
+      motivo: "Configure suas regras para ativar o farol de ganhos.",
+      score: 0,
+      custoEstimado,
+      lucroEstimado,
+      valorKm,
+      valorHora,
+      valorMinuto
+    };
+  }
 
   let falhas = 0;
   let alertas = 0;
+  let criteriosAtendidos = 0;
 
   if (lucroEstimado <= 0) falhas++;
-  if (regraValorKm && valorKm < regraValorKm) falhas++;
-  if (regraKmMax !== Infinity && km > regraKmMax) alertas++;
-  if (regraValorHora && valorHora < regraValorHora) alertas++;
-  if (regraNota && notaPassageiro < regraNota) alertas++;
+  else criteriosAtendidos++;
+
+  if (valorKm < regraValorKm) falhas++;
+  else criteriosAtendidos++;
+
+  if (valorHora < regraValorHora) alertas++;
+  else criteriosAtendidos++;
+
+  if (km > regraKmMax) alertas++;
+  else criteriosAtendidos++;
+
+  if (regraNota > 0 && notaPassageiro < regraNota) alertas++;
+  else criteriosAtendidos++;
 
   let decisao = "ACEITAR";
   let tipo = "aceitar";
   let motivo = "Corrida dentro das regras definidas pelo motorista.";
 
-  if (falhas >= 1) {
+  if (falhas > 0) {
     decisao = "RECUSAR";
     tipo = "recusar";
-    motivo = "Corrida fora das regras mínimas de rentabilidade.";
-  } else if (alertas >= 1) {
+    motivo = "Corrida abaixo do mínimo de ganho definido por você.";
+  } else if (alertas > 0) {
     decisao = "ANALISAR";
     tipo = "analisar";
-    motivo = "Corrida exige análise: algum critério ficou fora do ideal.";
+    motivo = "Corrida tem ganho possível, mas exige atenção.";
   }
-
-  const criteriosAtendidos = [
-    lucroEstimado > 0,
-    !regraValorKm || valorKm >= regraValorKm,
-    regraKmMax === Infinity || km <= regraKmMax,
-    !regraValorHora || valorHora >= regraValorHora,
-    !regraNota || notaPassageiro >= regraNota
-  ].filter(Boolean).length;
 
   const score = Math.round((criteriosAtendidos / 5) * 100);
 
@@ -1199,7 +1210,7 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
     lucroEstimado,
     valorKm,
     valorHora,
-    valorMinuto: tempo > 0 ? valor / tempo : 0
+    valorMinuto
   };
 }
 // ===============================
