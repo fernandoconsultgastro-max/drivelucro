@@ -671,7 +671,7 @@ function atualizarDashboard() {
 // BLOCO 20 — DASHBOARD SEGURO
 // MANUTENÇÃO:
 // Proteção contra undefined / NaN
-// Nenhum valor quebra a interface
+// Separação clara de custos (manual vs operacional)
 // ===============================
 
 const elFaturamento = pegarElemento("faturamento");
@@ -680,6 +680,7 @@ const elLucro = pegarElemento("lucro");
 const elKmTotal = pegarElemento("km-total");
 const elValorKm = pegarElemento("valor-km");
 const elValorHora = pegarElemento("valor-hora");
+const elCustosDetalhe = pegarElemento("custos-detalhe");
 
 // 🔒 PROTEÇÃO TOTAL DE DADOS
 const faturamento = Number(r?.faturamento || 0);
@@ -696,12 +697,22 @@ const valorHora = Number(r?.valorHora || 0);
 // ===============================
 
 if (elFaturamento) elFaturamento.textContent = moeda(faturamento);
+
 if (elCustos) elCustos.textContent = moeda(custoTotal);
+
 if (elLucro) elLucro.textContent = moeda(lucro);
+
 if (elKmTotal) elKmTotal.textContent = `${km.toFixed(1)} km`;
+
 if (elValorKm) elValorKm.textContent = moeda(valorKm);
+
 if (elValorHora) elValorHora.textContent = moeda(valorHora);
 
+// 🔥 DETALHE INTELIGENTE DE CUSTOS (TRANSPARÊNCIA)
+if (elCustosDetalhe) {
+  elCustosDetalhe.textContent =
+    `Lançados: ${moeda(custoManual)} • Rodagem: ${moeda(custoOperacional)}`;
+}
 // ===============================
 // BLOCO DESEMPENHO
 // ===============================
