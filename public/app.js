@@ -1204,14 +1204,17 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   let motivo = "Corrida dentro das regras definidas pelo motorista.";
 
   if (falhas > 0) {
-    decisao = "RECUSAR";
-    tipo = "recusar";
-    motivo = "Corrida abaixo do mínimo de ganho definido por você.";
-  } else if (alertas > 0) {
-    decisao = "ANALISAR";
-    tipo = "analisar";
-    motivo = "Corrida tem ganho possível, mas exige atenção.";
-  }
+  decisao = "RECUSAR";
+  tipo = "recusar";
+
+} else if (criteriosAtendidos >= 4) {
+  decisao = "ACEITAR";
+  tipo = "aceitar";
+
+} else {
+  decisao = "ANALISAR";
+  tipo = "analisar";
+}
 
   const score = Math.round((criteriosAtendidos / 5) * 100);
 
