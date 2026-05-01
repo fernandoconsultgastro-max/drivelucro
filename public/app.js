@@ -654,13 +654,13 @@ lucro,
 function atualizarDashboard() {
   const r = calcularResumo();
  const meta = obterMeta();
-
 // ===============================
 // BLOCO 20 — DASHBOARD SEGURO
 // MANUTENÇÃO:
-// Atualiza os cards apenas se os elementos existirem no HTML.
-// Evita quebra geral da interface.
+// Proteção contra undefined / NaN
+// Nenhum valor quebra a interface
 // ===============================
+
 const elFaturamento = pegarElemento("faturamento");
 const elCustos = pegarElemento("custos");
 const elLucro = pegarElemento("lucro");
@@ -668,30 +668,47 @@ const elKmTotal = pegarElemento("km-total");
 const elValorKm = pegarElemento("valor-km");
 const elValorHora = pegarElemento("valor-hora");
 
-if (elFaturamento) elFaturamento.textContent = moeda(r.faturamento);
-if (elCustos) elCustos.textContent = moeda(r.custosTotal);
-if (elLucro) elLucro.textContent = moeda(r.lucro);
-if (elKmTotal) elKmTotal.textContent = `${r.km.toFixed(1)} km`;
-if (elValorKm) elValorKm.textContent = moeda(r.valorKm);
-if (elValorHora) elValorHora.textContent = moeda(r.valorHora);
+// 🔒 PROTEÇÃO TOTAL DE DADOS
+const faturamento = Number(r?.faturamento || 0);
+const custosTotal = Number(r?.custosTotal || 0);
+const lucro = Number(r?.lucro || 0);
+const km = Number(r?.km || 0);
+const valorKm = Number(r?.valorKm || 0);
+const valorHora = Number(r?.valorHora || 0);
 
- // BLOCO DESEMPENHO
-const desempenho = calcularDesempenho();
+// ===============================
+// CARDS PRINCIPAIS
+// ===============================
+
+if (elFaturamento) elFaturamento.textContent = moeda(faturamento);
+if (elCustos) elCustos.textContent = moeda(custosTotal);
+if (elLucro) elLucro.textContent = moeda(lucro);
+if (elKmTotal) elKmTotal.textContent = `${km.toFixed(1)} km`;
+if (elValorKm) elValorKm.textContent = moeda(valorKm);
+if (elValorHora) elValorHora.textContent = moeda(valorHora);
+
+// ===============================
+// BLOCO DESEMPENHO
+// ===============================
+
+const desempenho = calcularDesempenho?.();
 
 if (desempenho) {
   const box = pegarElemento("desempenho-box");
 
   if (box) {
-    const classeStatus = desempenho.lucro >= 0
+    const lucroDesempenho = Number(desempenho?.lucro || 0);
+
+    const classeStatus = lucroDesempenho >= 0
       ? "status-positivo"
       : "status-negativo";
 
     box.innerHTML = `
       <div class="card ${classeStatus}">
         <span>Resultado real do período</span>
-        <strong>${moeda(desempenho.lucro)}</strong>
+        <strong>${moeda(lucroDesempenho)}</strong>
         <small>
-          ${desempenho.lucro >= 0 ? "Lucro real" : "Prejuízo real"} • Baseado no KM real do veículo
+          ${lucroDesempenho >= 0 ? "Lucro real" : "Prejuízo real"} • Baseado no KM real do veículo
         </small>
       </div>
     `;
