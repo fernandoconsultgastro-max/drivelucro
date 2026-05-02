@@ -1833,6 +1833,17 @@ function renderizarHistoricoChamadas() {
     box.innerHTML = "<p>Nenhuma chamada analisada ainda.</p>";
     return;
   }
+  function avaliarCriterio(valor, regra) {
+  if (!regra) return { status: "neutro", peso: 0 };
+
+  const percentual = valor / regra;
+
+  if (percentual >= 1) return { status: "aceitar", peso: 1 };
+  if (percentual >= 0.9) return { status: "analisar", peso: 0.8 };
+  if (percentual >= 0.5) return { status: "alerta", peso: 0.5 };
+
+  return { status: "recusar", peso: 0 };
+}
 
   // ===============================
   // MÉTRICAS
