@@ -1166,11 +1166,11 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   const regraKmMax = Number(regras.kmMax || 0);
   const regraNota = Number(regras.notaMin || 0);
 
-  if (!regraValorKm || !regraValorHora || !regraKmMax) {
+  if (!regraValorKm || !regraValorHora) {
     return {
       decisao: "CONFIGURAR",
       tipo: "alerta",
-      motivo: "Configure suas regras para ativar o farol de ganhos.",
+      motivo: "Configure valor mínimo por km e valor mínimo por hora.",
       score: 0,
       custoEstimado,
       lucroEstimado,
@@ -1180,43 +1180,36 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
     };
   }
 
-  let falhas = 0;
-  let alertas = 0;
-  let criteriosAtendidos = 0;
+  const criterios = [
+    lucroEstimado > 0,
+    valorKm >= regraValorKm,
+    valorHora >= regraValorHora,
+    regraKmMax > 0 ? km <= regraKmMax : true,
+    regraNota > 0 ? notaPassageiro >= regraNota : true
+  ];
 
-  if (lucroEstimado <= 0) falhas++;
-  else criteriosAtendidos++;
+  const score = Math.round(
+    (criterios.filter(Boolean).length / criterios.length) * 100
+  );
 
-  if (valorKm < regraValorKm) falhas++;
-  else criteriosAtendidos++;
+  let decisao = "ANALISAR";
+  let tipo = "analisar";
+  let motivo = "Corrida possível, mas exige análise do motorista.";
 
-  if (valorHora < regraValorHora) alertas++;
-  else criteriosAtendidos++;
-
-  if (km > regraKmMax) alertas++;
-  else criteriosAtendidos++;
-
-  if (regraNota > 0 && notaPassageiro < regraNota) alertas++;
-  else criteriosAtendidos++;
-
-  let decisao = "ACEITAR";
-  let tipo = "aceitar";
-  let motivo = "Corrida dentro das regras definidas pelo motorista.";
-
-  if (falhas > 0) {
-  decisao = "RECUSAR";
-  tipo = "recusar";
-
-} else if (criteriosAtendidos >= 4) {
-  decisao = "ACEITAR";
-  tipo = "aceitar";
-
-} else {
-  decisao = "ANALISAR";
-  tipo = "analisar";
-}
-
-  const score = Math.round((criteriosAtendidos / 5) * 100);
+  if (lucroEstimado <= 0 || valorKm < regraValorKm) {
+    decisao = "RECUSAR";
+    tipo = "recusar";
+    motivo = "Corrida abaixo do mínimo de ganho definido por você.";
+  } else if (
+    score >= 90 &&
+    valorKm >= regraValorKm * 1.35 &&
+    valorHora >= regraValorHora * 1.15 &&
+    (regraKmMax <= 0 || km <= regraKmMax)
+  ) {
+    decisao = "ACEITAR";
+    tipo = "aceitar";
+    motivo = "Corrida forte: boa relação entre valor, km, tempo e lucro.";
+  }
 
   return {
     decisao,
@@ -1833,11 +1826,11 @@ function renderizarHistoricoChamadas() {
   const box = pegarElemento("historico-chamadas");
   const metricasBox = pegarElemento("metricas-resumo");
 
-  if (!box) return;
+  if (box) box.innerHTML = "";
+  if (metricasBox) metricasBox.innerHTML = "";
 
   if (!historicoChamadas.length) {
     box.innerHTML = "<p>Nenhuma chamada analisada ainda.</p>";
-    if (metricasBox) metricasBox.innerHTML = "";
     return;
   }
 
