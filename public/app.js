@@ -1047,20 +1047,12 @@ function atualizarRegrasDoFormulario() {
 }
 
 // ---------- COR POR PERCENTUAL ----------
-let decisaoFinal = "ANALISAR";
+function getCor(percentual) {
+  const pct = Math.min(Number(percentual || 0), 100);
 
-if (pctKm < 70 || pctNota < 70) {
-  decisaoFinal = "RECUSAR";
-} else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
-  decisaoFinal = "ACEITAR";
-}
-
-if (
-  regras.kmMax > 0 &&
-  dados.km > regras.kmMax * 0.9 &&
-  decisaoFinal === "ACEITAR"
-) {
-  decisaoFinal = "ANALISAR";
+  if (pct <= 30) return "vermelho";
+  if (pct <= 49) return "amarelo";
+  return "verde";
 }
 
 // ---------- MOTOR DE CÁLCULO ----------
