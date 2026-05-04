@@ -1052,6 +1052,8 @@ function avaliarCriterio(valor, regra, tipo = "positivo") {
     percentual = (valor / regra) * 100;
   }
 
+  percentual = Math.min(percentual, 100);
+
   let status = "recusar";
 
   if (percentual >= 85) {
@@ -1138,24 +1140,32 @@ function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
   );
 
   const temCriterioAbaixoDe30 = criteriosAtivos.some(c => c.resultado.percentual < 30);
+const temCriterioAbaixoDe50 = criteriosAtivos.some(c => c.resultado.percentual < 50);
+const temCriterioEntre50e84 = criteriosAtivos.some(
+  c => c.resultado.percentual >= 50 && c.resultado.percentual < 85
+);
 
-  let decisao = "ANALISAR";
-  let tipo = "analisar";
-  let motivo = "Corrida dentro da zona de análise. Avalie região, retorno e contexto.";
+let decisao = "ANALISAR";
+let tipo = "analisar";
+let motivo = "Corrida exige análise: pelo menos um critério está abaixo da zona ideal.";
 
-  if (lucroEstimado < 0) {
-    decisao = "RECUSAR";
-    tipo = "recusar";
-    motivo = "Corrida com prejuízo estimado pelo custo real do veículo.";
-  } else if (temCriterioAbaixoDe30 || score < 50) {
-    decisao = "RECUSAR";
-    tipo = "recusar";
-    motivo = "Corrida muito abaixo dos critérios cadastrados.";
-  } else if (score >= 85) {
-    decisao = "ACEITAR";
-    tipo = "aceitar";
-    motivo = "Corrida acima da média dos seus critérios. Boa oportunidade.";
-  }
+if (lucroEstimado < 0) {
+  decisao = "RECUSAR";
+  tipo = "recusar";
+  motivo = "Corrida com prejuízo estimado pelo custo real do veículo.";
+} else if (temCriterioAbaixoDe30 || temCriterioAbaixoDe50 || score < 50) {
+  decisao = "RECUSAR";
+  tipo = "recusar";
+  motivo = "Corrida abaixo da zona mínima dos seus critérios.";
+} else if (temCriterioEntre50e84) {
+  decisao = "ANALISAR";
+  tipo = "analisar";
+  motivo = "Corrida próxima da meta, mas ainda abaixo da zona ideal.";
+} else if (score >= 85) {
+  decisao = "ACEITAR";
+  tipo = "aceitar";
+  motivo = "Todos os critérios ativos estão dentro da zona ideal.";
+}
 
   return {
     decisao,
