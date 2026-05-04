@@ -1156,7 +1156,6 @@ function salvarHistoricoSimulador(item) {
 
   renderizarHistoricoChamadas();
 }
-}
 
 // ---------- RENDER (SEMÁFORO) ----------
 function renderizarResultadoSimulador(resultado, dados) {
@@ -1246,17 +1245,6 @@ window.driveAlertaTimer = setTimeout(() => {
     alerta.classList.remove("saindo");
     alerta.innerHTML = "";
   }, 700);
-}, 5000);
-
-clearTimeout(window.driveAlertaTimer);
-
-window.driveAlertaTimer = setTimeout(() => {
-  alerta.classList.add("saindo");
-
-  setTimeout(() => {
-    alerta.classList.add("oculto");
-    alerta.classList.remove("saindo");
-  }, 650);
 }, 5000);
 
 }
