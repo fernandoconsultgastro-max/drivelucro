@@ -986,12 +986,12 @@ function configurarFormularioCusto() {
   });
 }
 
-// BLOCO 26A — PARSER DE CHAMADA
+// ===============================
+// BLOCO 26A — SIMULADOR / PARSER DE CHAMADA
 // MANUTENÇÃO:
-// Lê chamadas de app e soma múltiplos KM e múltiplos tempos.
-// Exemplo Uber:
-// 1,0 km + 3,4 km = 4,4 km
-// 3 min + 6 min = 9 min
+// Refatoração do simulador do zero.
+// Soma múltiplos KM e múltiplos tempos.
+// Exemplo Uber: 1,0 km + 3,4 km / 3 min + 6 min.
 // ===============================
 function normalizarNumero(valorTexto) {
   if (!valorTexto) return 0;
@@ -1004,6 +1004,316 @@ function normalizarNumero(valorTexto) {
   );
 }
 
+function extrairDadosChamada(texto) {
+  const textoLimpo = String(texto || "")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const valorMatch =
+    textoLimpo.match(/R\$\s?(\d+[.,]?\d*)/i) ||
+    textoLimpo.match(/valor\s*:?\s*(\d+[.,]?\d*)/i);
+
+  const kmMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?km/gi)];
+  const tempoMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?(min|minuto|minutos)/gi)];
+
+  const notaMatch =
+    textoLimpo.match(/(?:nota|passageiro|avalia[cç][aã]o|rating)\s*:?\s*(\d+[.,]?\d*)/i) ||
+    textoLimpo.match(/(\d+[.,]?\d*)\s?★/i);
+
+  const kmTotal = kmMatches.reduce((total, item) => total + normalizarNumero(item[1]), 0);
+  const tempoTotal = tempoMatches.reduce((total, item) => total + normalizarNumero(item[1]), 0);
+
+  return {
+    valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
+    km: kmTotal,
+    tempo: tempoTotal,
+    nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
+  };
+}
+
+// ===============================
+// BLOCO 26B — CRITÉRIOS DO SEMÁFORO
+// ===============================
+function avaliarCriterio(valor, regra, tipo = "positivo") {
+  if (!regra || regra <= 0) {
+    return {
+      ativo: false,
+      percentual: 100,
+      status: "neutro"
+    };
+  }
+
+  let percentual = 0;
+
+  if (tipo === "inverso") {
+    percentual = valor <= regra ? 100 : (regra / valor) * 100;
+  } else {
+    percentual = (valor / regra) * 100;
+  }
+
+  let status = "recusar";
+
+  if (percentual >= 85) {
+    status = "aceitar";
+  } else if (percentual >= 50) {
+    status = "analisar";
+  } else if (percentual >= 30) {
+    status = "critico";
+  }
+
+  return {
+    ativo: true,
+    percentual,
+    status
+  };
+}
+
+// ===============================
+// BLOCO 26C — MOTOR DE DECISÃO DO SIMULADOR
+// ===============================
+function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
+  const valorKm = km > 0 ? valor / km : 0;
+  const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
+  const valorMinuto = tempo > 0 ? valor / tempo : 0;
+
+  const custoEstimado = km * custoKm;
+  const lucroEstimado = valor - custoEstimado;
+
+  const regraValorKm = Number(regras.valorKmMin || 0);
+  const regraValorHora = Number(regras.valorHoraMin || 0);
+  const regraKmMax = Number(regras.kmMax || 0);
+  const regraNota = Number(regras.notaMin || 0);
+
+  const criterios = [
+    {
+      nome: "Valor por km",
+      valor: valorKm,
+      regra: regraValorKm,
+      tipo: "positivo",
+      resultado: avaliarCriterio(valorKm, regraValorKm, "positivo")
+    },
+    {
+      nome: "Valor por hora",
+      valor: valorHora,
+      regra: regraValorHora,
+      tipo: "positivo",
+      resultado: avaliarCriterio(valorHora, regraValorHora, "positivo")
+    },
+    {
+      nome: "KM máximo",
+      valor: km,
+      regra: regraKmMax,
+      tipo: "inverso",
+      resultado: avaliarCriterio(km, regraKmMax, "inverso")
+    },
+    {
+      nome: "Nota do passageiro",
+      valor: notaPassageiro,
+      regra: regraNota,
+      tipo: "positivo",
+      resultado: avaliarCriterio(notaPassageiro, regraNota, "positivo")
+    }
+  ];
+
+  const criteriosAtivos = criterios.filter(c => c.resultado.ativo);
+
+  if (!criteriosAtivos.length) {
+    return {
+      decisao: "CONFIGURAR",
+      tipo: "alerta",
+      motivo: "Cadastre seus critérios para o simulador funcionar.",
+      score: 0,
+      criterios,
+      valorKm,
+      valorHora,
+      valorMinuto,
+      custoEstimado,
+      lucroEstimado
+    };
+  }
+
+  const score = Math.round(
+    criteriosAtivos.reduce((total, c) => total + c.resultado.percentual, 0) / criteriosAtivos.length
+  );
+
+  const temCriterioAbaixoDe30 = criteriosAtivos.some(c => c.resultado.percentual < 30);
+
+  let decisao = "ANALISAR";
+  let tipo = "analisar";
+  let motivo = "Corrida dentro da zona de análise. Avalie região, retorno e contexto.";
+
+  if (lucroEstimado < 0) {
+    decisao = "RECUSAR";
+    tipo = "recusar";
+    motivo = "Corrida com prejuízo estimado pelo custo real do veículo.";
+  } else if (temCriterioAbaixoDe30 || score < 50) {
+    decisao = "RECUSAR";
+    tipo = "recusar";
+    motivo = "Corrida muito abaixo dos critérios cadastrados.";
+  } else if (score >= 85) {
+    decisao = "ACEITAR";
+    tipo = "aceitar";
+    motivo = "Corrida acima da média dos seus critérios. Boa oportunidade.";
+  }
+
+  return {
+    decisao,
+    tipo,
+    motivo,
+    score,
+    criterios,
+    valorKm,
+    valorHora,
+    valorMinuto,
+    custoEstimado,
+    lucroEstimado
+  };
+}
+
+// ===============================
+// BLOCO 26D — CUSTO AUTOMÁTICO DO SIMULADOR
+// ===============================
+function aplicarCustoAutomaticoSimulador() {
+  const campoCustoKm = pegarElemento("sim-custo-km");
+  if (!campoCustoKm) return;
+
+  const custoBase = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+
+  campoCustoKm.value = custoBase > 0
+    ? String(custoBase.toFixed(2)).replace(".", ",")
+    : "";
+}
+
+// ===============================
+// BLOCO 26E — RENDER DO RESULTADO
+// ===============================
+function renderizarResultadoSimulador(resultado, dados) {
+  const box = pegarElemento("resultado-simulador");
+  const decisaoRapida = pegarElemento("decisao-rapida");
+
+  if (!box) return;
+
+  if (decisaoRapida) {
+    decisaoRapida.className = `decisao-rapida ${resultado.tipo}`;
+    decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}%`;
+  }
+
+  box.className = `resultado ${resultado.tipo}`;
+  box.classList.remove("oculto");
+
+  const linhasCriterios = resultado.criterios
+    .filter(c => c.resultado.ativo)
+    .map(c => `
+      <p>
+        <strong>${c.nome}:</strong>
+        ${Math.round(c.resultado.percentual)}% da meta
+      </p>
+    `)
+    .join("");
+
+  box.innerHTML = `
+    <div class="semaforo-card ${resultado.tipo}">
+      <div class="semaforo-decisao">${resultado.decisao}</div>
+
+      <div class="semaforo-score">
+        Score ${resultado.score}%
+      </div>
+
+      <div class="semaforo-grid">
+        <div>
+          <span>R$/km</span>
+          <strong>${moeda(resultado.valorKm)}</strong>
+        </div>
+
+        <div>
+          <span>R$/hora</span>
+          <strong>${moeda(resultado.valorHora)}</strong>
+        </div>
+
+        <div>
+          <span>KM total</span>
+          <strong>${Number(dados.km || 0).toFixed(1)} km</strong>
+        </div>
+
+        <div>
+          <span>Tempo</span>
+          <strong>${Number(dados.tempo || 0).toFixed(0)} min</strong>
+        </div>
+
+        <div>
+          <span>Nota</span>
+          <strong>${Number(dados.nota || 0).toFixed(1)}</strong>
+        </div>
+
+        <div>
+          <span>Custo</span>
+          <strong>${moeda(resultado.custoEstimado)}</strong>
+        </div>
+
+        <div>
+          <span>Lucro</span>
+          <strong>${moeda(resultado.lucroEstimado)}</strong>
+        </div>
+      </div>
+
+      <div class="criterios-detalhe">
+        ${linhasCriterios}
+      </div>
+
+      <p class="semaforo-motivo">${resultado.motivo}</p>
+    </div>
+  `;
+}
+
+// ===============================
+// BLOCO 26F — CONFIGURAR SIMULADOR
+// ===============================
+function configurarSimulador() {
+  aplicarCustoAutomaticoSimulador();
+
+  const form = pegarElemento("form-simulador");
+  if (!form) return;
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+
+    const valor = numeroBR(pegarElemento("sim-valor")?.value);
+    const km = numeroBR(pegarElemento("sim-km")?.value);
+    const tempo = numeroBR(pegarElemento("sim-tempo")?.value);
+    const nota = numeroBR(pegarElemento("sim-nota")?.value || 5);
+
+    let custoKm = numeroBR(pegarElemento("sim-custo-km")?.value);
+
+    if (!custoKm || custoKm <= 0) {
+      custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+    }
+
+    if (!valor || !km || !tempo) {
+      alert("Preencha valor, km e tempo.");
+      return;
+    }
+
+    if (!custoKm || custoKm <= 0) {
+      alert("Configure primeiro o custo/km em Meu Veículo.");
+      return;
+    }
+
+    const resultado = analisarChamada(valor, km, tempo, custoKm, nota);
+
+    renderizarResultadoSimulador(resultado, {
+      valor,
+      km,
+      tempo,
+      nota,
+      custoKm
+    });
+  });
+}
+
+// ===============================
+// BLOCO 26G — CONFIGURAR LEITOR DE CHAMADA
+// ===============================
 function configurarParserChamada() {
   const textarea = pegarElemento("texto-chamada");
   const botao = pegarElemento("btn-processar-chamada");
@@ -1028,281 +1338,15 @@ function configurarParserChamada() {
     if (campoTempo) campoTempo.value = String(dados.tempo).replace(".", ",");
     if (campoNota) campoNota.value = String(dados.nota).replace(".", ",");
 
-    const custoKmInput = pegarElemento("sim-custo-km");
+    aplicarCustoAutomaticoSimulador();
 
-    if (custoKmInput && !custoKmInput.value) {
-      const custoBase = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+    const form = pegarElemento("form-simulador");
 
-      custoKmInput.value = custoBase > 0
-        ? String(custoBase.toFixed(2)).replace(".", ",")
-        : "";
-    }
-
-    const formSimulador = pegarElemento("form-simulador");
-
-    if (formSimulador) {
-      formSimulador.dispatchEvent(new Event("submit"));
+    if (form) {
+      form.dispatchEvent(new Event("submit"));
     }
 
     textarea.value = "";
-  });
-}
-
-// ===============================
-// BLOCO 46 — COPILOTO INTELIGENTE
-// ===============================
-function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
-  const custoKm = dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 1.55;
-
-  const valorKm = km > 0 ? valor / km : 0;
-  const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
-  const custoEstimado = km * custoKm;
-  const lucroEstimado = valor - custoEstimado;
-
-  let decisao = "RECUSAR";
-  let classe = "recusar";
-  let motivo = "Corrida abaixo do custo real do veículo.";
-
-  if (valorKm >= custoKm * 2 && valorHora >= regras.valorHoraMin && lucroEstimado > 0) {
-    decisao = "ACEITAR";
-    classe = "aceitar";
-    motivo = "Corrida lucrativa pelo custo real do veículo.";
-  } else if (valorKm >= custoKm * 1.4 && lucroEstimado > 0) {
-    decisao = "ANALISAR";
-    classe = "analisar";
-    motivo = "Corrida pode valer a pena dependendo da região e retorno.";
-  }
-
-  return {
-    decisao,
-    classe,
-    motivo,
-    custoKm,
-    valorKm,
-    valorHora,
-    custoEstimado,
-    lucroEstimado
-  };
-}
-
-function avaliarCriterio(valor, regra) {
-  if (!regra || regra <= 0) {
-    return { status: "neutro", peso: 1, percentual: 1 };
-  }
-
-  const percentual = valor / regra;
-
-  if (percentual >= 1) {
-    return { status: "aceitar", peso: 1, percentual };
-  }
-
-  if (percentual >= 0.9) {
-    return { status: "analisar", peso: 0.8, percentual };
-  }
-
-  if (percentual >= 0.5) {
-    return { status: "alerta", peso: 0.5, percentual };
-  }
-
-  return { status: "recusar", peso: 0, percentual };
-}
-
-// ===============================
-// BLOCO PREMIUM 03.1 — MOTOR DE DECISÃO DO SIMULADOR
-// MANUTENÇÃO:
-// Decisão mais conservadora.
-// Evita aceitar corrida longa só porque o valor/hora ficou alto.
-// ===============================
-function analisarChamada(valor, km, tempo, custoKm, notaPassageiro = 5) {
-  const valorKm = km > 0 ? valor / km : 0;
-  const valorHora = tempo > 0 ? valor / (tempo / 60) : 0;
-  const valorMinuto = tempo > 0 ? valor / tempo : 0;
-  const custoEstimado = km * custoKm;
-  const lucroEstimado = valor - custoEstimado;
-
-  const regraValorKm = Number(regras.valorKmMin || 0);
-  const regraValorHora = Number(regras.valorHoraMin || 0);
-  const regraKmMax = Number(regras.kmMax || 0);
-  const regraNota = Number(regras.notaMin || 0);
-
-  if (!regraValorKm || !regraValorHora) {
-    return {
-      decisao: "CONFIGURAR",
-      tipo: "alerta",
-      motivo: "Configure valor mínimo por km e valor mínimo por hora.",
-      score: 0,
-      custoEstimado,
-      lucroEstimado,
-      valorKm,
-      valorHora,
-      valorMinuto
-    };
-  }
-
-  const criterios = [
-    lucroEstimado > 0,
-    valorKm >= regraValorKm,
-    valorHora >= regraValorHora,
-    regraKmMax > 0 ? km <= regraKmMax : true,
-    regraNota > 0 ? notaPassageiro >= regraNota : true
-  ];
-
-  const score = Math.round(
-    (criterios.filter(Boolean).length / criterios.length) * 100
-  );
-
-  let decisao = "ANALISAR";
-  let tipo = "analisar";
-  let motivo = "Corrida possível, mas exige análise do motorista.";
-
-  if (lucroEstimado <= 0 || valorKm < regraValorKm) {
-    decisao = "RECUSAR";
-    tipo = "recusar";
-    motivo = "Corrida abaixo do mínimo de ganho definido por você.";
-  } else if (
-    score >= 90 &&
-    valorKm >= regraValorKm * 1.35 &&
-    valorHora >= regraValorHora * 1.15 &&
-    (regraKmMax <= 0 || km <= regraKmMax)
-  ) {
-    decisao = "ACEITAR";
-    tipo = "aceitar";
-    motivo = "Corrida forte: boa relação entre valor, km, tempo e lucro.";
-  }
-
-  return {
-    decisao,
-    tipo,
-    motivo,
-    score,
-    custoEstimado,
-    lucroEstimado,
-    valorKm,
-    valorHora,
-    valorMinuto
-  };
-}
-// ===============================
-// BLOCO 32 — INTEGRAR CUSTO AO SIMULADOR
-// ===============================
-function aplicarCustoAutomaticoSimulador() {
-  const campoCustoKm = pegarElemento("sim-custo-km");
-
-  if (!campoCustoKm) return;
-
-  // Se já existe custo real calculado
-  if (dadosVeiculo && dadosVeiculo.custoKmReal > 0) {
-    campoCustoKm.value = dadosVeiculo.custoKmReal
-      .toFixed(2)
-      .replace(".", ",");
-
-    campoCustoKm.setAttribute("readonly", true);
-    campoCustoKm.style.opacity = "0.6";
-  } else {
-    // fallback para padrão
-   campoCustoKm.value = regras.custoKmPadrao > 0
-  ? String(regras.custoKmPadrao).replace(".", ",")
-  : "";
-  }
-}
-
-// ===============================
-// BLOCO PREMIUM 03 — SIMULADOR COM SEMÁFORO
-// MANUTENÇÃO:
-// Um único botão: Analisar.
-// Renderiza apenas o card semáforo premium.
-// ===============================
-function configurarSimulador() {
-  aplicarCustoAutomaticoSimulador();
-
-  const form = pegarElemento("form-simulador");
-  const box = pegarElemento("resultado-simulador");
-
-  if (!form || !box) return;
-
-  form.addEventListener("submit", e => {
-    e.preventDefault();
-
-    const tipoCorrida = pegarElemento("sim-tipo-corrida")?.value || "app";
-    const appCorrida = pegarElemento("sim-app")?.value || "Uber";
-
-    const valor = numeroBR(pegarElemento("sim-valor")?.value);
-    const km = numeroBR(pegarElemento("sim-km")?.value);
-    const tempo = numeroBR(pegarElemento("sim-tempo")?.value);
-    const notaPassageiro = numeroBR(pegarElemento("sim-nota")?.value || 5);
-
-    let custoKm = numeroBR(pegarElemento("sim-custo-km")?.value);
-
-    if (!custoKm || custoKm <= 0) {
-      custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
-    }
-
-    if (tipoCorrida === "particular") {
-      custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
-    }
-
-    if (!valor || !km || !tempo) {
-      alert("Preencha valor, km e tempo.");
-      return;
-    }
-
-    if (!custoKm || custoKm <= 0) {
-      alert("Configure primeiro o custo/km em Meu Veículo.");
-      return;
-    }
-
-    const resultado = analisarChamada(valor, km, tempo, custoKm, notaPassageiro);
-
-    resultado.tipoCorrida = tipoCorrida;
-    resultado.appCorrida = appCorrida;
-
-    const decisaoRapida = pegarElemento("decisao-rapida");
-
-    if (decisaoRapida) {
-      decisaoRapida.className = `decisao-rapida ${resultado.tipo}`;
-      decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}/100`;
-    }
-
-    box.className = `resultado ${resultado.tipo}`;
-    box.classList.remove("oculto");
-
-    box.innerHTML = `
-      <div class="semaforo-card ${resultado.tipo}">
-        <div class="semaforo-decisao">
-          ${resultado.decisao}
-        </div>
-
-        <div class="semaforo-score">
-          Score ${resultado.score}/100
-        </div>
-
-        <div class="semaforo-grid">
-          <div>
-            <span>R$/km</span>
-            <strong>${moeda(resultado.valorKm)}</strong>
-          </div>
-
-          <div>
-            <span>R$/hora</span>
-            <strong>${moeda(resultado.valorHora)}</strong>
-          </div>
-
-          <div>
-            <span>Custo</span>
-            <strong>${moeda(resultado.custoEstimado)}</strong>
-          </div>
-
-          <div>
-            <span>Lucro</span>
-            <strong>${moeda(resultado.lucroEstimado)}</strong>
-          </div>
-        </div>
-
-        <p class="semaforo-motivo">
-          ${resultado.motivo}
-        </p>
-      </div>
-    `;
   });
 }
 
