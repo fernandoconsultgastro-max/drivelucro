@@ -1067,9 +1067,9 @@ function renderizarResultadoSimulador(resultado, dados) {
   const alerta = pegarElemento("drive-alerta");
   if (!alerta) return;
 
-  const regraKm = regras.valorKmMin || 0;
-  const regraHora = regras.valorHoraMin || 0;
-  const regraNota = regras.notaMin || 0;
+  const regraKm = Number(regras.valorKmMin || 0);
+  const regraHora = Number(regras.valorHoraMin || 0);
+  const regraNota = Number(regras.notaMin || 0);
 
   const pctKm = regraKm ? (resultado.valorKm / regraKm) * 100 : 100;
   const pctHora = regraHora ? (resultado.valorHora / regraHora) * 100 : 100;
@@ -1079,55 +1079,16 @@ function renderizarResultadoSimulador(resultado, dados) {
   const corHora = getCor(pctHora);
   const corNota = getCor(pctNota);
 
-  // ===============================
-// BLOCO — DECISÃO INTELIGENTE (GARRA DO SISTEMA)
-// ===============================
-let decisao = "ANALISAR";
+  let decisaoFinal = "ANALISAR";
 
-if (pctKm < 70) {
-  decisao = "RECUSAR"; 
-}
-
-// 🔴 nota ruim
-else if (pctNota < 80) {
-  decisao = "RECUSAR";
-}
-
-// 🟠 km alto com margem apertada
-else if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && pctKm < 110) {
-  decisao = "ANALISAR";
-}
-
-// 🟢 tudo muito bom
-else if (pctKm >= 100 && pctHora >= 100) {
-  decisao = "ACEITAR";
-}
-
-  // ---------- MENTORIA ----------
-
-  let decisao = "ANALISAR";
-
-if (corKm === "vermelho") {
-  decisao = "RECUSAR";
-} else if (corKm === "laranja") {
-  decisao = "ANALISAR";
-} else {
-  // km está bom, agora valida risco
-
-  if (dados.km > regras.kmMax * 0.9) {
-    decisao = "ANALISAR";
-  } else if (corHora === "verde" && corNota === "verde") {
-    decisao = "ACEITAR";
-  }
-}
-  let mentoria = "Corrida equilibrada. Avalie região.";
-
-  if (corKm === "vermelho") {
-    mentoria = "Corrida fraca no ganho por km.";
-  } else if (corKm === "laranja") {
-    mentoria = "Corrida próxima da meta por km.";
-  } else if (corKm === "verde" && corHora === "verde") {
-    mentoria = "Boa oportunidade de ganho.";
+  if (pctKm < 70) {
+    decisaoFinal = "RECUSAR";
+  } else if (pctNota < 80) {
+    decisaoFinal = "RECUSAR";
+  } else if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && pctKm < 110) {
+    decisaoFinal = "ANALISAR";
+  } else if (pctKm >= 100 && pctHora >= 100) {
+    decisaoFinal = "ACEITAR";
   }
 
   alerta.classList.remove("oculto");
@@ -1142,7 +1103,6 @@ if (corKm === "vermelho") {
       </div>
 
       <div class="drive-metricas">
-
         <div class="drive-item ${corKm}">
           <span>R$/km</span>
           <strong>${resultado.valorKm.toFixed(2)}</strong>
@@ -1157,7 +1117,6 @@ if (corKm === "vermelho") {
           <span>Nota</span>
           <strong>${dados.nota.toFixed(1)}</strong>
         </div>
-
       </div>
 
       <div class="drive-info">
@@ -1165,15 +1124,12 @@ if (corKm === "vermelho") {
         <span>${dados.km.toFixed(1)} km</span>
       </div>
 
-      <p class="drive-mentoria">${mentoria}</p>
-
-      <div class="drive-decisao ${decisao.toLowerCase()}">
-  ${decisao}
-</div>
+      <div class="drive-decisao ${decisaoFinal.toLowerCase()}">
+        ${decisaoFinal}
+      </div>
     </div>
   `;
 }
-
 // ---------- SIMULADOR ----------
 function configurarSimulador() {
   const form = pegarElemento("form-simulador");
