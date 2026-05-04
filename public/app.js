@@ -1047,10 +1047,20 @@ function atualizarRegrasDoFormulario() {
 }
 
 // ---------- COR POR PERCENTUAL ----------
-function getCor(percentual) {
-  if (percentual < 50) return "vermelho";
-  if (percentual < 85) return "amarelo";
-  return "verde";
+let decisaoFinal = "ANALISAR";
+
+if (pctKm < 70 || pctNota < 70) {
+  decisaoFinal = "RECUSAR";
+} else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
+  decisaoFinal = "ACEITAR";
+}
+
+if (
+  regras.kmMax > 0 &&
+  dados.km > regras.kmMax * 0.9 &&
+  decisaoFinal === "ACEITAR"
+) {
+  decisaoFinal = "ANALISAR";
 }
 
 // ---------- MOTOR DE CÁLCULO ----------
@@ -1109,21 +1119,23 @@ function renderizarResultadoSimulador(resultado, dados) {
   const corHora = getCor(pctHora);
   const corNota = getCor(pctNota);
 
-  let decisaoFinal = "ANALISAR";
+  const mediaFarol = Math.round(
+  (
+    Math.min(pctKm, 100) +
+    Math.min(pctHora, 100) +
+    Math.min(pctNota, 100)
+  ) / 3
+);
 
-  if (pctKm < 70 || pctNota < 70) {
-    decisaoFinal = "RECUSAR";
-  } else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
-    decisaoFinal = "ACEITAR";
-  }
+let decisaoFinal = "ACEITAR";
 
-  if (
-    regras.kmMax > 0 &&
-    dados.km > regras.kmMax * 0.9 &&
-    decisaoFinal === "ACEITAR"
-  ) {
-    decisaoFinal = "ANALISAR";
-  }
+if (mediaFarol <= 30) {
+  decisaoFinal = "RECUSAR";
+} else if (mediaFarol <= 49) {
+  decisaoFinal = "ANALISAR";
+} else {
+  decisaoFinal = "ACEITAR";
+}
 
   alerta.classList.remove("oculto");
 
