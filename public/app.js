@@ -1092,8 +1092,7 @@ function salvarHistoricoSimulador(item) {
 
   renderizarHistoricoChamadas();
 }
-
-// ---------- RENDER (SEMÁFORO) ----------
+// ---------- RENDER (SEMÁFORO) ----------
 function renderizarResultadoSimulador(resultado, dados) {
   const alerta = pegarElemento("drive-alerta");
   if (!alerta) return;
@@ -1110,27 +1109,21 @@ function renderizarResultadoSimulador(resultado, dados) {
   const corHora = getCor(pctHora);
   const corNota = getCor(pctNota);
 
-let decisaoFinal = "ANALISAR";
+  let decisaoFinal = "ANALISAR";
 
-// corte crítico (ruim de verdade)
-if (pctKm < 70 || pctNota < 70) {
-  decisaoFinal = "RECUSAR";
-}
+  if (pctKm < 70 || pctNota < 70) {
+    decisaoFinal = "RECUSAR";
+  } else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
+    decisaoFinal = "ACEITAR";
+  }
 
-// zona intermediária (vida real)
-else if (pctKm < 100 || pctHora < 100 || pctNota < 100) {
-  decisaoFinal = "ANALISAR";
-}
-
-// corrida forte
-else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
-  decisaoFinal = "ACEITAR";
-}
-
-// ajuste fino de km longo
-if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && decisaoFinal === "ACEITAR") {
-  decisaoFinal = "ANALISAR";
-}
+  if (
+    regras.kmMax > 0 &&
+    dados.km > regras.kmMax * 0.9 &&
+    decisaoFinal === "ACEITAR"
+  ) {
+    decisaoFinal = "ANALISAR";
+  }
 
   alerta.classList.remove("oculto");
 
@@ -1156,13 +1149,13 @@ if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && decisaoFinal === "ACEIT
 
         <div class="drive-item ${corNota}">
           <span>Nota</span>
-          <strong>${dados.nota.toFixed(1)}</strong>
+          <strong>${Number(dados.nota).toFixed(1)}</strong>
         </div>
       </div>
 
       <div class="drive-info">
-        <span>${dados.tempo} min</span>
-        <span>${dados.km.toFixed(1)} km</span>
+        <span>${Number(dados.tempo).toFixed(0)} min</span>
+        <span>${Number(dados.km).toFixed(1)} km</span>
       </div>
 
       <div class="drive-decisao ${decisaoFinal.toLowerCase()}">
@@ -1171,28 +1164,27 @@ if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && decisaoFinal === "ACEIT
     </div>
   `;
 
-salvarHistoricoSimulador({
-  decisao: decisaoFinal,
-  valor: dados.valor,
-  valorKm: resultado.valorKm,
-  valorHora: resultado.valorHora,
-  nota: dados.nota,
-  km: dados.km,
-  tempo: dados.tempo
-});
+  salvarHistoricoSimulador({
+    decisao: decisaoFinal,
+    valor: dados.valor,
+    valorKm: resultado.valorKm,
+    valorHora: resultado.valorHora,
+    nota: dados.nota,
+    km: dados.km,
+    tempo: dados.tempo
+  });
 
-clearTimeout(window.driveAlertaTimer);
+  clearTimeout(window.driveAlertaTimer);
 
-window.driveAlertaTimer = setTimeout(() => {
-  alerta.classList.add("saindo");
+  window.driveAlertaTimer = setTimeout(() => {
+    alerta.classList.add("saindo");
 
-  setTimeout(() => {
-    alerta.classList.add("oculto");
-    alerta.classList.remove("saindo");
-    alerta.innerHTML = "";
-  }, 700);
-}, 5000);
-
+    setTimeout(() => {
+      alerta.classList.add("oculto");
+      alerta.classList.remove("saindo");
+      alerta.innerHTML = "";
+    }, 700);
+  }, 5000);
 }
 // ---------- SIMULADOR ----------
 function configurarSimulador() {
