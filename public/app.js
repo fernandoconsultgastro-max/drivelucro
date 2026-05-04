@@ -1084,9 +1084,8 @@ function renderizarResultadoSimulador(resultado, dados) {
 // ===============================
 let decisao = "ANALISAR";
 
-// 🔴 CORTE DURO (principal)
 if (pctKm < 70) {
-  decisao = "RECUSAR";
+  decisao = "RECUSAR"; 
 }
 
 // 🔴 nota ruim
