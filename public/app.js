@@ -1129,6 +1129,31 @@ function analisarChamada(valor, km, tempo, custoKm, nota = 5) {
   };
 }
 
+function dataHojeISO() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function salvarHistoricoSimulador(item) {
+  let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
+
+  const hoje = dataHojeISO();
+
+  historico = historico.filter(registro => registro.dataISO === hoje);
+
+  historico.unshift({
+    ...item,
+    dataISO: hoje,
+    hora: new Date().toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    })
+  });
+
+  localStorage.setItem("historicoSimulador", JSON.stringify(historico));
+
+  renderizarHistoricoChamadas();
+}
+
 // ---------- RENDER (SEMÁFORO) ----------
 function renderizarResultadoSimulador(resultado, dados) {
   const alerta = pegarElemento("drive-alerta");
@@ -1196,6 +1221,28 @@ function renderizarResultadoSimulador(resultado, dados) {
       </div>
     </div>
   `;
+
+  salvarHistoricoSimulador({
+  decisao: decisaoFinal,
+  valorKm: resultado.valorKm,
+  valorHora: resultado.valorHora,
+  nota: dados.nota,
+  km: dados.km,
+  tempo: dados.tempo,
+  valor: dados.valor
+});
+
+clearTimeout(window.driveAlertaTimer);
+
+window.driveAlertaTimer = setTimeout(() => {
+  alerta.classList.add("saindo");
+
+  setTimeout(() => {
+    alerta.classList.add("oculto");
+    alerta.classList.remove("saindo");
+  }, 650);
+}, 5000);
+
 }
 // ---------- SIMULADOR ----------
 function configurarSimulador() {
@@ -1739,15 +1786,28 @@ function init() {
 
 function renderizarHistoricoChamadas() {
   const box = pegarElemento("historico-chamadas");
-  const metricasBox = pegarElemento("metricas-resumo");
+  if (!box) return;
 
-  if (box) {
+  const hoje = dataHojeISO();
+
+  let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
+
+  historico = historico.filter(item => item.dataISO === hoje);
+
+  localStorage.setItem("historicoSimulador", JSON.stringify(historico));
+
+  if (!historico.length) {
     box.innerHTML = "<p>Nenhuma chamada analisada ainda.</p>";
+    return;
   }
 
-  if (metricasBox) {
-    metricasBox.innerHTML = "";
-  }
+  box.innerHTML = historico.map(item => `
+    <div class="historico-chamada-item">
+      <strong>${item.hora} — ${item.decisao}</strong>
+      <p>R$/km: ${item.valorKm.toFixed(2)} • R$/hora: ${item.valorHora.toFixed(2)}</p>
+      <p>${item.tempo} min • ${item.km.toFixed(1)} km • Nota ${Number(item.nota).toFixed(1)}</p>
+    </div>
+  `).join("");
 }
 
 document.addEventListener("DOMContentLoaded", init);

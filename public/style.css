@@ -1115,3 +1115,23 @@ BLOCO PREMIUM 03 — COPILOTO
 .drive-decisao.recusar {
   color: #7f1d1d;
 }
+.drive-alerta.saindo {
+  animation: driveSaidaPneu 0.65s ease-in forwards;
+}
+
+.drive-alerta.saindo .drive-carro::after {
+  content: "💨";
+  margin-left: 6px;
+}
+
+@keyframes driveSaidaPneu {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
