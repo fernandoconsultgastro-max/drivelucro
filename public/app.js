@@ -1116,14 +1116,9 @@ function calcularLogicaSemaforo(pctKm, pctHora, pctNota) {
 
   let decisao = "ACEITAR";
 
-  if (corKm === "vermelho" || corHora === "vermelho" || corNota === "vermelho") {
+  if (km <= 30 || hora <= 30 || nota <= 30) {
     decisao = "RECUSAR";
-  } else if (
-    media <= 49 ||
-    corKm === "amarelo" ||
-    corHora === "amarelo" ||
-    corNota === "amarelo"
-  ) {
+  } else if (media <= 49 || km <= 49 || hora <= 49 || nota <= 49) {
     decisao = "ANALISAR";
   }
 
@@ -1135,7 +1130,6 @@ function calcularLogicaSemaforo(pctKm, pctHora, pctNota) {
     decisao
   };
 }
-
 // ---------- RENDER (SEMÁFORO) ----------
 function renderizarResultadoSimulador(resultado, dados) {
   const alerta = pegarElemento("drive-alerta");
