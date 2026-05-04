@@ -988,12 +988,17 @@ function configurarFormularioCusto() {
 
 // ===============================
 // BLOCO 26A — PARSER DE CHAMADA
+// MANUTENÇÃO:
+// Lê chamadas de app e soma múltiplos KM e múltiplos tempos.
+// Exemplo Uber:
+// 1,0 km + 3,4 km = 4,4 km
+// 3 min + 6 min = 9 min
 // ===============================
 function normalizarNumero(valorTexto) {
   if (!valorTexto) return 0;
 
   return Number(
-    valorTexto
+    String(valorTexto)
       .replace("R$", "")
       .replace(/\s/g, "")
       .replace(",", ".")
@@ -1012,103 +1017,27 @@ function extrairDadosChamada(texto) {
     textoLimpo.match(/R\$\s?(\d+[.,]?\d*)/i) ||
     textoLimpo.match(/valor\s*:?\s*(\d+[.,]?\d*)/i);
 
-  const kmMatch =
-    textoLimpo.match(/(\d+[.,]?\d*)\s?km/i) ||
-    textoLimpo.match(/dist[aâ]ncia\s*:?\s*(\d+[.,]?\d*)/i) ||
-    textoLimpo.match(/km\s*:?\s*(\d+[.,]?\d*)/i);
-
-  const tempoMatch =
-    textoLimpo.match(/(\d+[.,]?\d*)\s?(min|minutos)/i) ||
-    textoLimpo.match(/tempo\s*:?\s*(\d+[.,]?\d*)/i);
+  const kmMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?km/gi)];
+  const tempoMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?(min|minuto|minutos)/gi)];
 
   const notaMatch =
     textoLimpo.match(/(?:nota|passageiro|avalia[cç][aã]o|rating)\s*:?\s*(\d+[.,]?\d*)/i) ||
     textoLimpo.match(/(\d+[.,]?\d*)\s?★/i);
 
+  const kmTotal = kmMatches.reduce((total, item) => {
+    return total + normalizarNumero(item[1]);
+  }, 0);
+
+  const tempoTotal = tempoMatches.reduce((total, item) => {
+    return total + normalizarNumero(item[1]);
+  }, 0);
+
   return {
     valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
-    km: kmMatch ? normalizarNumero(kmMatch[1]) : 0,
-    tempo: tempoMatch ? normalizarNumero(tempoMatch[1]) : 0,
+    km: kmTotal,
+    tempo: tempoTotal,
     nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
   };
-}
-
-function configurarParserChamada() {
-  const textarea = pegarElemento("texto-chamada");
-  const botao = pegarElemento("btn-processar-chamada");
-
-  if (!textarea || !botao) return;
-
-  botao.addEventListener("click", () => {
-    const dados = extrairDadosChamada(textarea.value);
-
-    if (!dados.valor || !dados.km || !dados.tempo) {
-      alert("Não consegui identificar valor, km e tempo no texto da chamada.");
-      return;
-    }
-
-    pegarElemento("sim-valor").value = String(dados.valor).replace(".", ",");
-    pegarElemento("sim-km").value = String(dados.km).replace(".", ",");
-    pegarElemento("sim-tempo").value = String(dados.tempo).replace(".", ",");
-
-    const campoNota = pegarElemento("sim-nota");
-    if (campoNota) campoNota.value = String(dados.nota).replace(".", ",");
-
-    const tipoCorrida = pegarElemento("sim-tipo-corrida")?.value || "app";
-    const custoKmInput = pegarElemento("sim-custo-km");
-
-    if (custoKmInput && !custoKmInput.value) {
-   const custoBase = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
-
-   custoKmInput.value = custoBase > 0
-    ? String(custoBase.toFixed(2)).replace(".", ",")
-    : "";
-    }
-
-    const formSimulador = pegarElemento("form-simulador");
-    formSimulador.dispatchEvent(new Event("submit"));
-
-    setTimeout(() => {
-      const appCorrida = pegarElemento("sim-app")?.value || "Uber";
-      const valor = numeroBR(pegarElemento("sim-valor").value);
-      const km = numeroBR(pegarElemento("sim-km").value);
-      const tempo = numeroBR(pegarElemento("sim-tempo").value);
-      const custoKm = tipoCorrida === "particular"
-        ? Number(regras.custoKmPadrao || 0)
-        : numeroBR(pegarElemento("sim-custo-km").value);
-
-      const nota = numeroBR(pegarElemento("sim-nota")?.value || 5);
-
-      const resultado = analisarChamada(valor, km, tempo, custoKm, nota);
-
-      resultado.tipoCorrida = tipoCorrida;
-      resultado.appCorrida = appCorrida;
-
-      historicoChamadas.unshift({
-        data: new Date().toLocaleString("pt-BR"),
-        decisao: resultado.decisao,
-        tipo: resultado.tipo,
-        score: resultado.score,
-        tipoCorrida,
-        appCorrida,
-        valor,
-        km,
-        tempo,
-        nota,
-        valorKm: resultado.valorKm,
-        valorHora: resultado.valorHora,
-        valorMinuto: resultado.valorMinuto,
-        custoEstimado: resultado.custoEstimado,
-        lucroEstimado: resultado.lucroEstimado
-      });
-
-      historicoChamadas = historicoChamadas.slice(0, 10);
-      localStorage.setItem("historicoChamadas", JSON.stringify(historicoChamadas));
-
-      renderizarHistoricoChamadas();
-      textarea.value = "";
-    }, 100);
-  });
 }
 
 // ===============================
@@ -1146,6 +1075,28 @@ function gerarCopilotoInteligente(valor, km, tempo, nota = 5) {
     custoEstimado,
     lucroEstimado
   };
+}
+
+function avaliarCriterio(valor, regra) {
+  if (!regra || regra <= 0) {
+    return { status: "neutro", peso: 1, percentual: 1 };
+  }
+
+  const percentual = valor / regra;
+
+  if (percentual >= 1) {
+    return { status: "aceitar", peso: 1, percentual };
+  }
+
+  if (percentual >= 0.9) {
+    return { status: "analisar", peso: 0.8, percentual };
+  }
+
+  if (percentual >= 0.5) {
+    return { status: "alerta", peso: 0.5, percentual };
+  }
+
+  return { status: "recusar", peso: 0, percentual };
 }
 
 // ===============================
@@ -1826,78 +1777,16 @@ function renderizarHistoricoChamadas() {
   const box = pegarElemento("historico-chamadas");
   const metricasBox = pegarElemento("metricas-resumo");
 
-  if (box) box.innerHTML = "";
-  if (metricasBox) metricasBox.innerHTML = "";
-
-  if (!historicoChamadas.length) {
+  if (box) {
     box.innerHTML = "<p>Nenhuma chamada analisada ainda.</p>";
-    return;
   }
-  function avaliarCriterio(valor, regra) {
-  if (!regra) return { status: "neutro", peso: 0 };
-
-  const percentual = valor / regra;
-
-  if (percentual >= 1) return { status: "aceitar", peso: 1 };
-  if (percentual >= 0.9) return { status: "analisar", peso: 0.8 };
-  if (percentual >= 0.5) return { status: "alerta", peso: 0.5 };
-
-  return { status: "recusar", peso: 0 };
-}
-
-  // ===============================
-  // MÉTRICAS
-  // ===============================
-  const total = historicoChamadas.length;
-
-  const aceitas = historicoChamadas.filter(i => i.tipo === "aceitar").length;
-  const recusadas = historicoChamadas.filter(i => i.tipo === "recusar").length;
-  const analisadas = historicoChamadas.filter(i => i.tipo === "analisar").length;
-
-  const scoreMedio = (
-    historicoChamadas.reduce((t, i) => t + i.score, 0) / total
-  ).toFixed(0);
-
-  const valorMedio = (
-    historicoChamadas.reduce((t, i) => t + i.valor, 0) / total
-  ).toFixed(2);
-
-  const valorHoraMedio = (
-    historicoChamadas.reduce((t, i) => t + i.valorHora, 0) / total
-  ).toFixed(2);
 
   if (metricasBox) {
-    metricasBox.innerHTML = `
-      <strong>Resumo das decisões</strong>
-      <p>Total analisado: ${total}</p>
-      <p>✔ Aceitas: ${aceitas}</p>
-      <p>⚠ Analisadas: ${analisadas}</p>
-      <p>❌ Recusadas: ${recusadas}</p>
-      <p>Score médio: ${scoreMedio}</p>
-      <p>Valor médio: R$ ${valorMedio}</p>
-      <p>Valor/hora médio: R$ ${valorHoraMedio}</p>
-    `;
+    metricasBox.innerHTML = "";
   }
-
-  // ===============================
-  // LISTA
-  // ===============================
-  box.innerHTML = historicoChamadas.map(item => `
-    <div class="historico-chamada-item ${item.tipo}">
-      <strong>${item.decisao} — Score ${item.score}/100</strong>
-      <p>${item.data}</p>
-      <p>Valor: ${moeda(item.valor)} • Km: ${item.km} • Tempo: ${item.tempo} min • Nota: ${item.nota}</p>
-      <p>Valor/km: ${moeda(item.valorKm)} • Valor/hora: ${moeda(item.valorHora)}</p>
-      <p>Custo: ${moeda(item.custoEstimado)} • Lucro: ${moeda(item.lucroEstimado)}</p>
-    </div>
-  `).join("");
 }
 
 document.addEventListener("DOMContentLoaded", init);
-
-  setTimeout(finalizarSplash, 1600);
-
-
 // ===============================
 // BLOCO 30 — CONTROLE DRAWER
 // MANUTENÇÃO:
