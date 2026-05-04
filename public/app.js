@@ -989,31 +989,24 @@ function configurarFormularioCusto() {
 // ===============================
 // BLOCO 26A — SIMULADOR / PARSER DE CHAMADas
 // ===============================
-
-// ---------- NORMALIZADOR ----------
+// ---------- PARSER (ÚNICO E OFICIAL) ----------
 function extrairDadosChamada(texto) {
   const textoLimpo = String(texto || "")
     .replace(/\n/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-  const valorMatch = textoLimpo.match(/R\$\s*(\d+(?:[.,]\d+)?)/i);
+  const valorMatch = textoLimpo.match(/R\$\s?(\d+[.,]?\d*)/i);
 
-  const kmMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*km/gi)];
-
-  const tempoMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*(min|minuto|minutos)/gi)];
+  const kmMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?km/gi)];
+  const tempoMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?(min|minutos)/gi)];
 
   const notaMatch =
-    textoLimpo.match(/(\d+(?:[.,]\d+)?)\s*★/i) ||
-    textoLimpo.match(/nota\s*:?\s*(\d+(?:[.,]\d+)?)/i);
+    textoLimpo.match(/(\d+[.,]?\d*)\s?★/i) ||
+    textoLimpo.match(/nota\s*:?\s*(\d+[.,]?\d*)/i);
 
-  const kmTotal = kmMatches.reduce((total, item) => {
-    return total + normalizarNumero(item[1]);
-  }, 0);
-
-  const tempoTotal = tempoMatches.reduce((total, item) => {
-    return total + normalizarNumero(item[1]);
-  }, 0);
+  const kmTotal = kmMatches.reduce((t, v) => t + normalizarNumero(v[1]), 0);
+  const tempoTotal = tempoMatches.reduce((t, v) => t + normalizarNumero(v[1]), 0);
 
   return {
     valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
@@ -1041,63 +1034,6 @@ function normalizarNumero(valorTexto) {
   }
 
   return Number(valor);
-}
-function extrairDadosChamada(texto) {
-  const textoLimpo = String(texto || "")
-    .replace(/\n/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const valorMatch = textoLimpo.match(/R\$\s*(\d+(?:[.,]\d+)?)/i);
-
-  const kmMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*km/gi)];
-  const tempoMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*(min|minutos)/gi)];
-
-  const notaMatch =
-    textoLimpo.match(/(\d+(?:[.,]\d+)?)\s*★/i) ||
-    textoLimpo.match(/nota\s*:?\s*(\d+(?:[.,]\d+)?)/i);
-
-  const kmTotal = kmMatches.reduce((acc, item) => {
-    return acc + normalizarNumero(item[1]);
-  }, 0);
-
-  const tempoTotal = tempoMatches.reduce((acc, item) => {
-    return acc + normalizarNumero(item[1]);
-  }, 0);
-
-  return {
-    valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
-    km: kmTotal,
-    tempo: tempoTotal,
-    nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
-  };
-}
-
-// ---------- PARSER (SOMA KM + TEMPO) ----------
-function extrairDadosChamada(texto) {
-  const textoLimpo = String(texto || "")
-    .replace(/\n/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  const valorMatch =
-    textoLimpo.match(/R\$\s?(\d+[.,]?\d*)/i);
-
-  const kmMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?km/gi)];
-  const tempoMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?(min|minutos)/gi)];
-
-  const notaMatch =
-    textoLimpo.match(/(\d+[.,]?\d*)\s?★/i);
-
-  const kmTotal = kmMatches.reduce((t, v) => t + normalizarNumero(v[1]), 0);
-  const tempoTotal = tempoMatches.reduce((t, v) => t + normalizarNumero(v[1]), 0);
-
-  return {
-    valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
-    km: kmTotal,
-    tempo: tempoTotal,
-    nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
-  };
 }
 
 // ---------- REGRAS DINÂMICAS ----------
