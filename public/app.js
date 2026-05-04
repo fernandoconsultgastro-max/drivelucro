@@ -1029,15 +1029,19 @@ function extrairDadosChamada(texto) {
 function normalizarNumero(valorTexto) {
   if (!valorTexto) return 0;
 
-  return Number(
-    String(valorTexto)
-      .replace("R$", "")
-      .replace(/\s/g, "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-  );
-}
+  let valor = String(valorTexto)
+    .replace("R$", "")
+    .replace(/\s/g, "")
+    .trim();
 
+  if (valor.includes(".") && valor.includes(",")) {
+    valor = valor.replace(/\./g, "").replace(",", ".");
+  } else if (valor.includes(",")) {
+    valor = valor.replace(",", ".");
+  }
+
+  return Number(valor);
+}
 function extrairDadosChamada(texto) {
   const textoLimpo = String(texto || "")
     .replace(/\n/g, " ")
@@ -1134,9 +1138,8 @@ function dataHojeISO() {
 }
 
 function salvarHistoricoSimulador(item) {
-  let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
-
   const hoje = dataHojeISO();
+  let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
 
   historico = historico.filter(registro => registro.dataISO === hoje);
 
@@ -1152,6 +1155,7 @@ function salvarHistoricoSimulador(item) {
   localStorage.setItem("historicoSimulador", JSON.stringify(historico));
 
   renderizarHistoricoChamadas();
+}
 }
 
 // ---------- RENDER (SEMÁFORO) ----------
@@ -1222,15 +1226,27 @@ function renderizarResultadoSimulador(resultado, dados) {
     </div>
   `;
 
-  salvarHistoricoSimulador({
+salvarHistoricoSimulador({
   decisao: decisaoFinal,
+  valor: dados.valor,
   valorKm: resultado.valorKm,
   valorHora: resultado.valorHora,
   nota: dados.nota,
   km: dados.km,
-  tempo: dados.tempo,
-  valor: dados.valor
+  tempo: dados.tempo
 });
+
+clearTimeout(window.driveAlertaTimer);
+
+window.driveAlertaTimer = setTimeout(() => {
+  alerta.classList.add("saindo");
+
+  setTimeout(() => {
+    alerta.classList.add("oculto");
+    alerta.classList.remove("saindo");
+    alerta.innerHTML = "";
+  }, 700);
+}, 5000);
 
 clearTimeout(window.driveAlertaTimer);
 
@@ -1789,11 +1805,9 @@ function renderizarHistoricoChamadas() {
   if (!box) return;
 
   const hoje = dataHojeISO();
-
   let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
 
   historico = historico.filter(item => item.dataISO === hoje);
-
   localStorage.setItem("historicoSimulador", JSON.stringify(historico));
 
   if (!historico.length) {
@@ -1804,8 +1818,8 @@ function renderizarHistoricoChamadas() {
   box.innerHTML = historico.map(item => `
     <div class="historico-chamada-item">
       <strong>${item.hora} — ${item.decisao}</strong>
-      <p>R$/km: ${item.valorKm.toFixed(2)} • R$/hora: ${item.valorHora.toFixed(2)}</p>
-      <p>${item.tempo} min • ${item.km.toFixed(1)} km • Nota ${Number(item.nota).toFixed(1)}</p>
+      <p>R$/km: ${Number(item.valorKm).toFixed(2)} • R$/hora: ${Number(item.valorHora).toFixed(2)}</p>
+      <p>${Number(item.tempo).toFixed(0)} min • ${Number(item.km).toFixed(1)} km • Nota ${Number(item.nota).toFixed(1)}</p>
     </div>
   `).join("");
 }
