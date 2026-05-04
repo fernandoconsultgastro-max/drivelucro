@@ -1094,6 +1094,48 @@ function salvarHistoricoSimulador(item) {
 
   renderizarHistoricoChamadas();
 }
+
+function calcularLogicaSemaforo(pctKm, pctHora, pctNota) {
+  const limitar = valor => Math.min(Number(valor || 0), 100);
+
+  const km = limitar(pctKm);
+  const hora = limitar(pctHora);
+  const nota = limitar(pctNota);
+
+  function corPorPercentual(percentual) {
+    if (percentual <= 30) return "vermelho";
+    if (percentual <= 49) return "amarelo";
+    return "verde";
+  }
+
+  const corKm = corPorPercentual(km);
+  const corHora = corPorPercentual(hora);
+  const corNota = corPorPercentual(nota);
+
+  const media = Math.round((km + hora + nota) / 3);
+
+  let decisao = "ACEITAR";
+
+  if (corKm === "vermelho" || corHora === "vermelho" || corNota === "vermelho") {
+    decisao = "RECUSAR";
+  } else if (
+    media <= 49 ||
+    corKm === "amarelo" ||
+    corHora === "amarelo" ||
+    corNota === "amarelo"
+  ) {
+    decisao = "ANALISAR";
+  }
+
+  return {
+    corKm,
+    corHora,
+    corNota,
+    media,
+    decisao
+  };
+}
+
 // ---------- RENDER (SEMÁFORO) ----------
 function renderizarResultadoSimulador(resultado, dados) {
   const alerta = pegarElemento("drive-alerta");
@@ -1107,27 +1149,13 @@ function renderizarResultadoSimulador(resultado, dados) {
   const pctHora = regraHora ? (resultado.valorHora / regraHora) * 100 : 100;
   const pctNota = regraNota ? (dados.nota / regraNota) * 100 : 100;
 
-  const corKm = getCor(pctKm);
-  const corHora = getCor(pctHora);
-  const corNota = getCor(pctNota);
+ const semaforo = calcularLogicaSemaforo(pctKm, pctHora, pctNota);
 
-  const mediaFarol = Math.round(
-  (
-    Math.min(pctKm, 100) +
-    Math.min(pctHora, 100) +
-    Math.min(pctNota, 100)
-  ) / 3
-);
-
-let decisaoFinal = "ACEITAR";
-
-if (mediaFarol <= 30) {
-  decisaoFinal = "RECUSAR";
-} else if (mediaFarol <= 49) {
-  decisaoFinal = "ANALISAR";
-} else {
-  decisaoFinal = "ACEITAR";
-}
+const corKm = semaforo.corKm;
+const corHora = semaforo.corHora;
+const corNota = semaforo.corNota;
+const mediaFarol = semaforo.media;
+const decisaoFinal = semaforo.decisao;
 
   alerta.classList.remove("oculto");
 
