@@ -986,7 +986,6 @@ function configurarFormularioCusto() {
   });
 }
 
-// ===============================
 // BLOCO 26A — PARSER DE CHAMADA
 // MANUTENÇÃO:
 // Lê chamadas de app e soma múltiplos KM e múltiplos tempos.
@@ -1005,39 +1004,48 @@ function normalizarNumero(valorTexto) {
   );
 }
 
-function extrairDadosChamada(texto) {
-  const textoOriginal = texto || "";
+function configurarParserChamada() {
+  const textarea = pegarElemento("texto-chamada");
+  const botao = pegarElemento("btn-processar-chamada");
 
-  const textoLimpo = textoOriginal
-    .replace(/\n/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  if (!textarea || !botao) return;
 
-  const valorMatch =
-    textoLimpo.match(/R\$\s?(\d+[.,]?\d*)/i) ||
-    textoLimpo.match(/valor\s*:?\s*(\d+[.,]?\d*)/i);
+  botao.addEventListener("click", () => {
+    const dados = extrairDadosChamada(textarea.value);
 
-  const kmMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?km/gi)];
-  const tempoMatches = [...textoLimpo.matchAll(/(\d+[.,]?\d*)\s?(min|minuto|minutos)/gi)];
+    if (!dados.valor || !dados.km || !dados.tempo) {
+      alert("Não consegui identificar valor, km e tempo no texto da chamada.");
+      return;
+    }
 
-  const notaMatch =
-    textoLimpo.match(/(?:nota|passageiro|avalia[cç][aã]o|rating)\s*:?\s*(\d+[.,]?\d*)/i) ||
-    textoLimpo.match(/(\d+[.,]?\d*)\s?★/i);
+    const campoValor = pegarElemento("sim-valor");
+    const campoKm = pegarElemento("sim-km");
+    const campoTempo = pegarElemento("sim-tempo");
+    const campoNota = pegarElemento("sim-nota");
 
-  const kmTotal = kmMatches.reduce((total, item) => {
-    return total + normalizarNumero(item[1]);
-  }, 0);
+    if (campoValor) campoValor.value = String(dados.valor).replace(".", ",");
+    if (campoKm) campoKm.value = String(dados.km).replace(".", ",");
+    if (campoTempo) campoTempo.value = String(dados.tempo).replace(".", ",");
+    if (campoNota) campoNota.value = String(dados.nota).replace(".", ",");
 
-  const tempoTotal = tempoMatches.reduce((total, item) => {
-    return total + normalizarNumero(item[1]);
-  }, 0);
+    const custoKmInput = pegarElemento("sim-custo-km");
 
-  return {
-    valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
-    km: kmTotal,
-    tempo: tempoTotal,
-    nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
-  };
+    if (custoKmInput && !custoKmInput.value) {
+      const custoBase = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
+
+      custoKmInput.value = custoBase > 0
+        ? String(custoBase.toFixed(2)).replace(".", ",")
+        : "";
+    }
+
+    const formSimulador = pegarElemento("form-simulador");
+
+    if (formSimulador) {
+      formSimulador.dispatchEvent(new Event("submit"));
+    }
+
+    textarea.value = "";
+  });
 }
 
 // ===============================
