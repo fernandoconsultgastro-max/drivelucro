@@ -1112,15 +1112,27 @@ function renderizarResultadoSimulador(resultado, dados) {
 
   let decisaoFinal = "ANALISAR";
 
-  if (pctKm < 70) {
-    decisaoFinal = "RECUSAR";
-  } else if (pctNota < 80) {
-    decisaoFinal = "RECUSAR";
-  } else if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && pctKm < 110) {
-    decisaoFinal = "ANALISAR";
-  } else if (pctKm >= 100 && pctHora >= 100) {
-    decisaoFinal = "ACEITAR";
-  }
+ let decisaoFinal = "ANALISAR";
+
+// corte crítico (ruim de verdade)
+if (pctKm < 70 || pctNota < 70) {
+  decisaoFinal = "RECUSAR";
+}
+
+// zona intermediária (vida real)
+else if (pctKm < 100 || pctHora < 100 || pctNota < 100) {
+  decisaoFinal = "ANALISAR";
+}
+
+// corrida forte
+else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
+  decisaoFinal = "ACEITAR";
+}
+
+// ajuste fino de km longo
+if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && decisaoFinal === "ACEITAR") {
+  decisaoFinal = "ANALISAR";
+}
 
   alerta.classList.remove("oculto");
 
