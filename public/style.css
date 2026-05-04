@@ -1100,3 +1100,22 @@ BLOCO PREMIUM 03 — COPILOTO
     transform: translateX(0);
   }
 }
+
+.drive-decisao {
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.drive-decisao.aceitar {
+  color: #22c55e;
+}
+
+.drive-decisao.analisar {
+  color: #f97316;
+}
+
+.drive-decisao.recusar {
+  color: #ef4444;
+}
