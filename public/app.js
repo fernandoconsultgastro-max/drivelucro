@@ -1023,6 +1023,18 @@ function extrairDadosChamada(texto) {
   };
 }
 
+function normalizarNumero(valorTexto) {
+  if (!valorTexto) return 0;
+
+  return Number(
+    String(valorTexto)
+      .replace("R$", "")
+      .replace(/\s/g, "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+  );
+}
+
 // ---------- PARSER (SOMA KM + TEMPO) ----------
 function extrairDadosChamada(texto) {
   const textoLimpo = String(texto || "")
