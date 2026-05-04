@@ -866,17 +866,16 @@ BLOCO PREMIUM 03 — COPILOTO
 /* CORES */
 
 .vermelho {
-  border-left: 4px solid #ef4444;
+  border-left: 4px solid #7f1d1d;
 }
 
-.laranja {
-  border-left: 4px solid #f97316;
+.amarelo {
+  border-left: 4px solid #eab308;
 }
 
 .verde {
   border-left: 4px solid #22c55e;
 }
-
 .linha-info {
   margin-top: 10px;
   display: flex;
@@ -957,18 +956,6 @@ BLOCO PREMIUM 03 — COPILOTO
   font-size: 18px;
   color: #f8fafc;
   margin-top: 3px;
-}
-
-.drive-item.verde {
-  border-left-color: #22c55e;
-}
-
-.drive-item.laranja {
-  border-left-color: #f97316;
-}
-
-.drive-item.vermelho {
-  border-left-color: #ef4444;
 }
 
 .drive-info {
@@ -1062,15 +1049,24 @@ BLOCO PREMIUM 03 — COPILOTO
 }
 
 .drive-item.verde {
-  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  border-left: 4px solid #22c55e;
+  border: 1px solid #22c55e;
+  color: #22c55e;
 }
 
-.drive-item.laranja {
-  border-left-color: #f97316;
+.drive-item.amarelo {
+  background: rgba(234, 179, 8, 0.15);
+  border-left: 4px solid #eab308;
+  border: 1px solid #eab308;
+  color: #eab308;
 }
 
 .drive-item.vermelho {
-  border-left-color: #ef4444;
+  background: rgba(127, 29, 29, 0.2);
+  border-left: 4px solid #7f1d1d;
+  border: 1px solid #7f1d1d;
+  color: #7f1d1d;
 }
 
 .drive-info {
@@ -1113,9 +1109,9 @@ BLOCO PREMIUM 03 — COPILOTO
 }
 
 .drive-decisao.analisar {
-  color: #f97316;
+  color: #eab308;
 }
 
 .drive-decisao.recusar {
-  color: #ef4444;
+  color: #7f1d1d;
 }

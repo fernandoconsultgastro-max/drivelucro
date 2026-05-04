@@ -1063,7 +1063,7 @@ function atualizarRegrasDoFormulario() {
 // ---------- COR POR PERCENTUAL ----------
 function getCor(percentual) {
   if (percentual < 50) return "vermelho";
-  if (percentual < 85) return "laranja";
+  if (percentual < 85) return "amarelo";
   return "verde";
 }
 
