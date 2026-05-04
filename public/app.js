@@ -1000,10 +1000,10 @@ function normalizarNumero(valorTexto) {
     String(valorTexto)
       .replace("R$", "")
       .replace(/\s/g, "")
+      .replace(/\./g, ".")
       .replace(",", ".")
   );
 }
-
 function extrairDadosChamada(texto) {
   const textoLimpo = String(texto || "")
     .replace(/\n/g, " ")
@@ -1069,6 +1069,20 @@ function avaliarCriterio(valor, regra, tipo = "positivo") {
     percentual,
     status
   };
+}
+
+function atualizarRegrasDoFormulario() {
+  const valorKm = pegarElemento("regra-valor-km");
+  const valorHora = pegarElemento("regra-valor-hora");
+  const kmMax = pegarElemento("regra-km-max");
+  const nota = pegarElemento("regra-nota");
+
+  regras.valorKmMin = normalizarNumero(valorKm?.value);
+  regras.valorHoraMin = normalizarNumero(valorHora?.value);
+  regras.kmMax = normalizarNumero(kmMax?.value);
+  regras.notaMin = normalizarNumero(nota?.value);
+
+  localStorage.setItem("regras", JSON.stringify(regras));
 }
 
 // ===============================
@@ -1268,13 +1282,14 @@ function configurarSimulador() {
 
   form.addEventListener("submit", e => {
     e.preventDefault();
+    atualizarRegrasDoFormulario();
 
     const valor = numeroBR(pegarElemento("sim-valor")?.value);
     const km = numeroBR(pegarElemento("sim-km")?.value);
     const tempo = numeroBR(pegarElemento("sim-tempo")?.value);
     const nota = numeroBR(pegarElemento("sim-nota")?.value || 5);
 
-    let custoKm = numeroBR(pegarElemento("sim-custo-km")?.value);
+    let custoKm = normalizarNumero(pegarElemento("sim-custo-km")?.value);
 
     if (!custoKm || custoKm <= 0) {
       custoKm = Number(dadosVeiculo?.custoKmReal || regras.custoKmPadrao || 0);
