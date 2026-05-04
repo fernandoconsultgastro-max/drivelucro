@@ -1111,8 +1111,7 @@ function renderizarResultadoSimulador(resultado, dados) {
   const corNota = getCor(pctNota);
 
   let decisaoFinal = "ANALISAR";
-
- let decisaoFinal = "ANALISAR";
+let decisaoFinal = "ANALISAR";
 
 // corte crítico (ruim de verdade)
 if (pctKm < 70 || pctNota < 70) {
@@ -1133,8 +1132,6 @@ else if (pctKm >= 100 && pctHora >= 100 && pctNota >= 100) {
 if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && decisaoFinal === "ACEITAR") {
   decisaoFinal = "ANALISAR";
 }
-
-  alerta.classList.remove("oculto");
 
   alerta.innerHTML = `
     <div class="drive-carro">🚗</div>
