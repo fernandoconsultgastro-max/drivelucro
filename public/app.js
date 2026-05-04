@@ -1198,84 +1198,65 @@ function aplicarCustoAutomaticoSimulador() {
 // ===============================
 // BLOCO 26E — RENDER DO RESULTADO
 // ===============================
+function getCor(percentual) {
+  if (percentual < 50) return "vermelho";
+  if (percentual < 85) return "laranja";
+  return "verde";
+}
+
 function renderizarResultadoSimulador(resultado, dados) {
-  const box = pegarElemento("resultado-simulador");
-  const decisaoRapida = pegarElemento("decisao-rapida");
+  const alerta = pegarElemento("drive-alerta");
+  if (!alerta) return;
 
-  if (!box) return;
+  const regraKm = Number(regras.valorKmMin || 0);
+  const regraHora = Number(regras.valorHoraMin || 0);
+  const regraNota = Number(regras.notaMin || 0);
 
-  if (decisaoRapida) {
-    decisaoRapida.className = `decisao-rapida ${resultado.tipo}`;
-    decisaoRapida.textContent = `${resultado.decisao} — SCORE ${resultado.score}%`;
-  }
+  const pctKm = regraKm ? (resultado.valorKm / regraKm) * 100 : 100;
+  const pctHora = regraHora ? (resultado.valorHora / regraHora) * 100 : 100;
+  const pctNota = regraNota ? (dados.nota / regraNota) * 100 : 100;
 
-  box.className = `resultado ${resultado.tipo}`;
-  box.classList.remove("oculto");
+  const corKm = getCor(pctKm);
+  const corHora = getCor(pctHora);
+  const corNota = getCor(pctNota);
 
-  const linhasCriterios = resultado.criterios
-    .filter(c => c.resultado.ativo)
-    .map(c => `
-      <p>
-        <strong>${c.nome}:</strong>
-        ${Math.round(c.resultado.percentual)}% da meta
-      </p>
-    `)
-    .join("");
+  alerta.classList.remove("oculto");
 
-  box.innerHTML = `
-    <div class="semaforo-card ${resultado.tipo}">
-      <div class="semaforo-decisao">${resultado.decisao}</div>
+  alerta.innerHTML = `
+    <div class="drive-carro">🚗</div>
 
-      <div class="semaforo-score">
-        Score ${resultado.score}%
+    <div class="drive-card">
+      <div class="drive-topo">
+        <strong>DriveLucro</strong>
+        <span>Análise da corrida</span>
       </div>
 
-      <div class="semaforo-grid">
-        <div>
+      <div class="drive-metricas">
+
+        <div class="drive-item ${corKm}">
           <span>R$/km</span>
-          <strong>${moeda(resultado.valorKm)}</strong>
+          <strong>${resultado.valorKm.toFixed(2)}</strong>
         </div>
 
-        <div>
+        <div class="drive-item ${corHora}">
           <span>R$/hora</span>
-          <strong>${moeda(resultado.valorHora)}</strong>
+          <strong>${resultado.valorHora.toFixed(2)}</strong>
         </div>
 
-        <div>
-          <span>KM total</span>
-          <strong>${Number(dados.km || 0).toFixed(1)} km</strong>
-        </div>
-
-        <div>
-          <span>Tempo</span>
-          <strong>${Number(dados.tempo || 0).toFixed(0)} min</strong>
-        </div>
-
-        <div>
+        <div class="drive-item ${corNota}">
           <span>Nota</span>
-          <strong>${Number(dados.nota || 0).toFixed(1)}</strong>
+          <strong>${dados.nota.toFixed(1)}</strong>
         </div>
 
-        <div>
-          <span>Custo</span>
-          <strong>${moeda(resultado.custoEstimado)}</strong>
-        </div>
-
-        <div>
-          <span>Lucro</span>
-          <strong>${moeda(resultado.lucroEstimado)}</strong>
-        </div>
       </div>
 
-      <div class="criterios-detalhe">
-        ${linhasCriterios}
+      <div class="drive-info">
+        <span>${dados.tempo} min</span>
+        <span>${dados.km.toFixed(1)} km</span>
       </div>
-
-      <p class="semaforo-motivo">${resultado.motivo}</p>
     </div>
   `;
 }
-
 // ===============================
 // BLOCO 26F — CONFIGURAR SIMULADOR
 // ===============================
