@@ -991,15 +991,36 @@ function configurarFormularioCusto() {
 // ===============================
 
 // ---------- NORMALIZADOR ----------
-function normalizarNumero(valorTexto) {
-  if (!valorTexto) return 0;
+function extrairDadosChamada(texto) {
+  const textoLimpo = String(texto || "")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-  return Number(
-    String(valorTexto)
-      .replace("R$", "")
-      .replace(/\s/g, "")
-      .replace(",", ".")
-  );
+  const valorMatch = textoLimpo.match(/R\$\s*(\d+(?:[.,]\d+)?)/i);
+
+  const kmMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*km/gi)];
+
+  const tempoMatches = [...textoLimpo.matchAll(/(\d+(?:[.,]\d+)?)\s*(min|minuto|minutos)/gi)];
+
+  const notaMatch =
+    textoLimpo.match(/(\d+(?:[.,]\d+)?)\s*★/i) ||
+    textoLimpo.match(/nota\s*:?\s*(\d+(?:[.,]\d+)?)/i);
+
+  const kmTotal = kmMatches.reduce((total, item) => {
+    return total + normalizarNumero(item[1]);
+  }, 0);
+
+  const tempoTotal = tempoMatches.reduce((total, item) => {
+    return total + normalizarNumero(item[1]);
+  }, 0);
+
+  return {
+    valor: valorMatch ? normalizarNumero(valorMatch[1]) : 0,
+    km: kmTotal,
+    tempo: tempoTotal,
+    nota: notaMatch ? normalizarNumero(notaMatch[1]) : 5
+  };
 }
 
 // ---------- PARSER (SOMA KM + TEMPO) ----------
