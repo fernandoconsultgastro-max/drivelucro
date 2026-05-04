@@ -1084,18 +1084,24 @@ function renderizarResultadoSimulador(resultado, dados) {
 // ===============================
 let decisao = "ANALISAR";
 
-if (corKm === "vermelho") {
+// 🔴 CORTE DURO (principal)
+if (pctKm < 70) {
   decisao = "RECUSAR";
-} else if (corKm === "laranja") {
-  decisao = "ANALISAR";
-} else {
-  // KM está bom → validar risco
+}
 
-  if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9) {
-    decisao = "ANALISAR";
-  } else if (corHora === "verde" && corNota === "verde") {
-    decisao = "ACEITAR";
-  }
+// 🔴 nota ruim
+else if (pctNota < 80) {
+  decisao = "RECUSAR";
+}
+
+// 🟠 km alto com margem apertada
+else if (regras.kmMax > 0 && dados.km > regras.kmMax * 0.9 && pctKm < 110) {
+  decisao = "ANALISAR";
+}
+
+// 🟢 tudo muito bom
+else if (pctKm >= 100 && pctHora >= 100) {
+  decisao = "ACEITAR";
 }
 
   // ---------- MENTORIA ----------
