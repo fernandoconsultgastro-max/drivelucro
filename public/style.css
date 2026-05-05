@@ -1156,3 +1156,17 @@ BLOCO PREMIUM 03 — COPILOTO
     opacity: 0;
   }
 }
+.historico-filtro-box {
+  margin-top: 12px;
+}
+
+.historico-filtro-box summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #7CFC00;
+  margin-bottom: 10px;
+}
+
+#filtro-historico-chamadas {
+  margin-bottom: 10px;
+}
