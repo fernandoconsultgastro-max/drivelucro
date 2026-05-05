@@ -2474,8 +2474,8 @@ function gerarPacoteCopiloto(texto) {
 
   const regras = perfisCopiloto[perfilCopiloto] || perfisCopiloto.inteligente;
 
-  const statusKm = avaliarRegra(indicadores.valorPorKm, regras.metaKm);
-  const statusHora = avaliarRegra(indicadores.valorPorHora, regras.metaHora);
+ const statusKm = avaliarRegra(indicadores.lucroPorKm, regras.metaKm);
+const statusHora = avaliarRegra(indicadores.lucroPorHora, regras.metaHora);
   const statusNota = avaliarNota(dados.nota, regras.notaMinima);
 
  const decisaoBase = decisaoFinal(statusKm, statusHora, statusNota);
