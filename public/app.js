@@ -2267,27 +2267,40 @@ function calcularIndicadores(dados) {
   const kmTotal = kmAte + kmViagem;
   const tempoTotal = tempoAte + tempoViagem;
 
-  // Peso: deslocamento até passageiro vale menos
   const kmPonderado = kmViagem + (kmAte * 0.6);
-
-  // Penaliza tempo morto (até passageiro)
   const tempoPonderado = tempoViagem + (tempoAte * 1.2);
 
-  const valorPorKmReal = kmPonderado > 0
+  // 🔥 NOVO: custo real do veículo
+  const custoKm = Number(localStorage.getItem("custoKm")) || 0.8;
+
+  const custoTotal = kmTotal * custoKm;
+  const lucro = dados.valor - custoTotal;
+
+  const valorPorKm = kmPonderado > 0
     ? dados.valor / kmPonderado
     : 0;
 
-  const valorPorHoraReal = tempoPonderado > 0
+  const valorPorHora = tempoPonderado > 0
     ? (dados.valor / tempoPonderado) * 60
     : 0;
 
+  const lucroPorKm = kmTotal > 0
+    ? lucro / kmTotal
+    : 0;
+
+  const lucroPorHora = tempoTotal > 0
+    ? (lucro / tempoTotal) * 60
+    : 0;
+
   return {
-    valorPorKm: valorPorKmReal,
-    valorPorHora: valorPorHoraReal,
+    valorPorKm,
+    valorPorHora,
+    lucro,
+    lucroPorKm,
+    lucroPorHora,
+    custoTotal,
     kmTotal,
-    tempoTotal,
-    kmPonderado,
-    tempoPonderado
+    tempoTotal
   };
 }
 
