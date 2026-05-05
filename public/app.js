@@ -89,9 +89,12 @@ function formatarDataInput(dataISO) {
 }
 
 function formatarDataISO(date) {
-  return date.toISOString().split("T")[0];
-}
+  const ano = date.getFullYear();
+  const mes = String(date.getMonth() + 1).padStart(2, "0");
+  const dia = String(date.getDate()).padStart(2, "0");
 
+  return `${ano}-${mes}-${dia}`;
+}
 function atualizarInputData() {
   const input = pegarElemento("data-selecionada");
   if (!input) return;
@@ -939,7 +942,9 @@ function configurarFormularioCorrida() {
     }
 
     corridas.push({
-      data: formatarDataInput(dataCampo) || dataHoje(),
+      data: dataCampo
+    ? formatarDataInput(dataCampo)
+    : formatarDataInput(formatarDataISO(dataSelecionada)),
       app,
       valor,
       km,
@@ -1403,19 +1408,21 @@ function configurarControleData() {
   atualizarInputData();
 
   input.addEventListener("change", () => {
-    dataSelecionada = new Date(input.value);
+    const [ano, mes, dia] = input.value.split("-").map(Number);
+    dataSelecionada = new Date(ano, mes - 1, dia);
+
     renderizar();
     atualizarDashboard();
   });
 
-  btnAnterior.addEventListener("click", () => {
+  btnAnterior?.addEventListener("click", () => {
     dataSelecionada.setDate(dataSelecionada.getDate() - 1);
     atualizarInputData();
     renderizar();
     atualizarDashboard();
   });
 
-  btnProximo.addEventListener("click", () => {
+  btnProximo?.addEventListener("click", () => {
     dataSelecionada.setDate(dataSelecionada.getDate() + 1);
     atualizarInputData();
     renderizar();
