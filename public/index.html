@@ -292,28 +292,31 @@ Foco: leitura rápida, decisão e impacto visual
 </div>
 
       <!-- FORM -->
-    <form id="form-simulador">
-  <select id="sim-tipo-corrida">
-    <option value="app">Corrida por aplicativo</option>
-    <option value="particular">Corrida particular</option>
-  </select>
+ <details class="modo-avancado">
+  <summary>Modo avançado: teste manual</summary>
 
-  <select id="sim-app">
-    <option value="Uber">Uber</option>
-    <option value="99">99</option>
-    <option value="InDrive">InDrive</option>
-    <option value="Particular">Particular</option>
-  </select>
+  <form id="form-simulador">
+    <select id="sim-tipo-corrida">
+      <option value="app">Corrida por aplicativo</option>
+      <option value="particular">Corrida particular</option>
+    </select>
 
-  <input id="sim-valor" placeholder="Valor R$">
-        <input id="sim-km" placeholder="Km">
-        <input id="sim-tempo" placeholder="Tempo">
-        <input id="sim-custo-km" placeholder="Custo/km">
-        <input id="sim-nota" placeholder="Nota passageiro">
-        <button type="submit">Analisar</button>
-      </form>
+    <select id="sim-app">
+      <option value="Uber">Uber</option>
+      <option value="99">99</option>
+      <option value="InDrive">InDrive</option>
+      <option value="Particular">Particular</option>
+    </select>
 
-     <div id="drive-alerta" class="drive-alerta oculto"></div>
+    <input id="sim-valor" placeholder="Valor R$">
+    <input id="sim-km" placeholder="Km">
+    <input id="sim-tempo" placeholder="Tempo">
+    <input id="sim-custo-km" placeholder="Custo/km">
+    <input id="sim-nota" placeholder="Nota passageiro">
+
+    <button type="submit">Analisar</button>
+  </form>
+</details>
 
 <div id="resultado-simulador" class="resultado oculto"></div>
 
