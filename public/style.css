@@ -1190,3 +1190,60 @@ BLOCO PREMIUM 03 — COPILOTO
 .historico-chamada-item.recusar {
   border-left: 4px solid #ff4d4f;
 }
+/* ===============================
+   COPILOTO OVERLAY FLUTUANTE
+================================ */
+
+.copiloto-overlay {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: min(360px, calc(100% - 32px));
+  z-index: 9999;
+  background: #0b1a2a;
+  border-radius: 18px;
+  padding: 14px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.55);
+}
+
+.copiloto-overlay.oculto {
+  display: none;
+}
+
+.copiloto-overlay-card {
+  border-radius: 16px;
+  padding: 14px;
+  font-family: monospace;
+}
+
+.copiloto-overlay-card.aceitar {
+  border: 2px solid #00ff88;
+}
+
+.copiloto-overlay-card.analisar {
+  border: 2px solid #ffd000;
+}
+
+.copiloto-overlay-card.recusar {
+  border: 2px solid #ff4444;
+}
+
+.copiloto-overlay-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.copiloto-overlay-topo strong {
+  font-size: 20px;
+}
+
+.copiloto-fechar {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}

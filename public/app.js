@@ -2375,42 +2375,50 @@ window.executarCopilotoTeste = executarCopilotoTeste;
 
 function renderizarResultadoCopiloto(pacote) {
   const container = document.getElementById("saida-copiloto");
+  const overlay = document.getElementById("copiloto-overlay");
+
+  if (!container && !overlay) return;
 
   if (!pacote.sucesso) {
-    container.innerHTML = `<div style="color: red;">${pacote.mensagem}</div>`;
+    const erroHTML = `<div style="color: red;">${pacote.mensagem}</div>`;
+
+    if (container) container.innerHTML = erroHTML;
+    if (overlay) {
+      overlay.classList.remove("oculto");
+      overlay.innerHTML = erroHTML;
+    }
+
     return;
   }
 
+  let classe = "indefinido";
   let cor = "white";
   let emoji = "⚪";
 
   if (pacote.decisao === "ACEITAR") {
+    classe = "aceitar";
     cor = "#00ff88";
     emoji = "🟢";
   }
 
   if (pacote.decisao === "ANALISAR") {
+    classe = "analisar";
     cor = "#ffd000";
     emoji = "🟡";
   }
 
   if (pacote.decisao === "RECUSAR") {
+    classe = "recusar";
     cor = "#ff4444";
     emoji = "🔴";
   }
 
-  container.innerHTML = `
-    <div style="
-      background: #0b1a2a;
-      border: 2px solid ${cor};
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 10px;
-      font-family: monospace;
-    ">
-      <h2 style="color:${cor}; margin:0;">
-        ${emoji} ${pacote.decisao}
-      </h2>
+  const html = `
+    <div class="copiloto-overlay-card ${classe}">
+      <div class="copiloto-overlay-topo">
+        <strong style="color:${cor};">${emoji} ${pacote.decisao}</strong>
+        <button class="copiloto-fechar" onclick="fecharCopilotoOverlay()">×</button>
+      </div>
 
       <p>${pacote.mensagem}</p>
 
@@ -2428,4 +2436,18 @@ function renderizarResultadoCopiloto(pacote) {
       <p>Nota: ${pacote.status.nota}</p>
     </div>
   `;
+
+  if (container) container.innerHTML = html;
+
+  if (overlay) {
+    overlay.classList.remove("oculto");
+    overlay.innerHTML = html;
+  }
 }
+
+function fecharCopilotoOverlay() {
+  const overlay = document.getElementById("copiloto-overlay");
+  if (overlay) overlay.classList.add("oculto");
+}
+
+window.fecharCopilotoOverlay = fecharCopilotoOverlay;
