@@ -2300,12 +2300,31 @@ function gerarPacoteCopiloto(texto) {
 
   const indicadores = calcularIndicadores(dados);
 
-  const regras = {
-    perfil: "equilibrado",
-    metaKm: 2.5,
-    metaHora: 50,
-    notaMinima: 4.5
+  const perfilCopiloto =
+    localStorage.getItem("perfilCopiloto") || "inteligente";
+
+  const perfisCopiloto = {
+    conservador: {
+      perfil: "conservador",
+      metaKm: 2.8,
+      metaHora: 55,
+      notaMinima: 4.7
+    },
+    inteligente: {
+      perfil: "inteligente",
+      metaKm: 2.2,
+      metaHora: 45,
+      notaMinima: 4.5
+    },
+    agressivo: {
+      perfil: "agressivo",
+      metaKm: 1.7,
+      metaHora: 35,
+      notaMinima: 4.2
+    }
   };
+
+  const regras = perfisCopiloto[perfilCopiloto] || perfisCopiloto.inteligente;
 
   const statusKm = avaliarRegra(indicadores.valorPorKm, regras.metaKm);
   const statusHora = avaliarRegra(indicadores.valorPorHora, regras.metaHora);
@@ -2328,6 +2347,17 @@ function gerarPacoteCopiloto(texto) {
     },
     regras
   };
+}
+
+function alterarPerfilCopiloto(perfil) {
+  const permitidos = ["conservador", "inteligente", "agressivo"];
+
+  if (!permitidos.includes(perfil)) {
+    console.warn("Perfil de copiloto inválido:", perfil);
+    return;
+  }
+
+  localStorage.setItem("perfilCopiloto", perfil);
 }
 
 // ===============================
