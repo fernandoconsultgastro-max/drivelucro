@@ -2413,29 +2413,42 @@ function renderizarResultadoCopiloto(pacote) {
     emoji = "🔴";
   }
 
-  const html = `
-    <div class="copiloto-overlay-card ${classe}">
-      <div class="copiloto-overlay-topo">
-        <strong style="color:${cor};">${emoji} ${pacote.decisao}</strong>
-        <button class="copiloto-fechar" onclick="fecharCopilotoOverlay()">×</button>
-      </div>
-
-      <p>${pacote.mensagem}</p>
-
-      <hr>
-
-      <p><strong>Valor:</strong> R$ ${pacote.dados.valor.toFixed(2)}</p>
-      <p><strong>Tempo:</strong> ${pacote.dados.tempoTotal} min</p>
-      <p><strong>Distância:</strong> ${pacote.dados.kmTotal.toFixed(1)} km</p>
-      <p><strong>Nota:</strong> ${pacote.dados.nota}</p>
-
-      <hr>
-
-      <p>R$/km: ${pacote.indicadores.valorPorKm.toFixed(2)} (${pacote.status.km})</p>
-      <p>R$/hora: ${pacote.indicadores.valorPorHora.toFixed(2)} (${pacote.status.hora})</p>
-      <p>Nota: ${pacote.status.nota}</p>
+ const html = `
+  <div class="copiloto-uber-card ${classe}">
+    
+    <div class="uber-topo">
+      <span class="uber-app">🚗 ${pacote.app.toUpperCase()}</span>
+      <button class="copiloto-fechar" onclick="fecharCopilotoOverlay()">×</button>
     </div>
-  `;
+
+    <div class="uber-valor">
+      R$ ${pacote.dados.valor.toFixed(2)}
+    </div>
+
+    <div class="uber-nota">
+      ⭐ ${pacote.dados.nota.toFixed(2)}
+    </div>
+
+    <div class="uber-bloco">
+      <div>
+        ⏱ ${pacote.dados.tempoTotal} min
+      </div>
+      <div>
+        📍 ${pacote.dados.kmTotal.toFixed(1)} km
+      </div>
+    </div>
+
+    <div class="uber-decisao ${classe}">
+      ${emoji} ${pacote.decisao}
+    </div>
+
+    <div class="uber-metricas">
+      <span>R$/km: ${pacote.indicadores.valorPorKm.toFixed(2)}</span>
+      <span>R$/h: ${pacote.indicadores.valorPorHora.toFixed(2)}</span>
+    </div>
+
+  </div>
+`;
 
   if (container) container.innerHTML = html;
 

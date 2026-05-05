@@ -1247,3 +1247,88 @@ BLOCO PREMIUM 03 — COPILOTO
   font-size: 18px;
   cursor: pointer;
 }
+
+/* ===============================
+   COPILOTO ESTILO UBER
+================================ */
+
+.copiloto-uber-card {
+  background: #ffffff;
+  color: #000;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  font-family: Arial, sans-serif;
+}
+
+.uber-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.uber-app {
+  background: #000;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.uber-valor {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.uber-nota {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.uber-bloco {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.uber-decisao {
+  text-align: center;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.uber-decisao.aceitar {
+  background: #00ff88;
+}
+
+.uber-decisao.analisar {
+  background: #ffd000;
+}
+
+.uber-decisao.recusar {
+  background: #ff4444;
+  color: white;
+}
+
+.uber-metricas {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+/* ===============================
+   COPILOTO — OCULTAR CARD FIXO
+   Mantém o elemento para fallback/debug,
+   mas não polui a interface.
+================================ */
+
+#saida-copiloto {
+  display: none;
+}
+#card-copiloto-teste.oculto {
+  display: none !important;
+}
