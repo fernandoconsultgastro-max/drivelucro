@@ -2368,3 +2368,60 @@ window.decisaoFinal = decisaoFinal;
 window.gerarMensagem = gerarMensagem;
 window.gerarPacoteCopiloto = gerarPacoteCopiloto;
 window.executarCopilotoTeste = executarCopilotoTeste;
+
+function renderizarResultadoCopiloto(pacote) {
+  const container = document.getElementById("saida-copiloto");
+
+  if (!pacote.sucesso) {
+    container.innerHTML = `<div style="color: red;">${pacote.mensagem}</div>`;
+    return;
+  }
+
+  let cor = "white";
+  let emoji = "⚪";
+
+  if (pacote.decisao === "ACEITAR") {
+    cor = "#00ff88";
+    emoji = "🟢";
+  }
+
+  if (pacote.decisao === "ANALISAR") {
+    cor = "#ffd000";
+    emoji = "🟡";
+  }
+
+  if (pacote.decisao === "RECUSAR") {
+    cor = "#ff4444";
+    emoji = "🔴";
+  }
+
+  container.innerHTML = `
+    <div style="
+      background: #0b1a2a;
+      border: 2px solid ${cor};
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 10px;
+      font-family: monospace;
+    ">
+      <h2 style="color:${cor}; margin:0;">
+        ${emoji} ${pacote.decisao}
+      </h2>
+
+      <p>${pacote.mensagem}</p>
+
+      <hr>
+
+      <p><strong>Valor:</strong> R$ ${pacote.dados.valor.toFixed(2)}</p>
+      <p><strong>Tempo:</strong> ${pacote.dados.tempoTotal} min</p>
+      <p><strong>Distância:</strong> ${pacote.dados.kmTotal.toFixed(1)} km</p>
+      <p><strong>Nota:</strong> ${pacote.dados.nota}</p>
+
+      <hr>
+
+      <p>R$/km: ${pacote.indicadores.valorPorKm.toFixed(2)} (${pacote.status.km})</p>
+      <p>R$/hora: ${pacote.indicadores.valorPorHora.toFixed(2)} (${pacote.status.hora})</p>
+      <p>Nota: ${pacote.status.nota}</p>
+    </div>
+  `;
+}
