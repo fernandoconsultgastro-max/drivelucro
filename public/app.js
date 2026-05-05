@@ -2354,8 +2354,7 @@ function executarCopilotoTeste() {
     ? window.gerarPacoteCopiloto(entrada)
     : gerarPacoteCopiloto(entrada);
 
-  document.getElementById("saida-copiloto").textContent =
-    JSON.stringify(pacote, null, 2);
+renderizarResultadoCopiloto(pacote);
 }
 
 // EXPÕE FUNÇÕES DO COPILOTO NO ESCOPO GLOBAL PARA TESTE NO CONSOLE
