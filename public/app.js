@@ -2308,6 +2308,21 @@ function decisaoFinal(statusKm, statusHora, statusNota) {
   if ([statusKm, statusHora, statusNota].includes("amarelo")) return "ANALISAR";
   return "ACEITAR";
 }
+
+function gerarMensagem(decisao, indicadores, dados) {
+  const km = Number(indicadores.valorPorKm || 0).toFixed(2);
+  const hora = Number(indicadores.valorPorHora || 0).toFixed(2);
+
+  if (decisao === "ACEITAR") {
+    return `Boa corrida: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
+  }
+
+  if (decisao === "ANALISAR") {
+    return `Atenção: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
+  }
+
+  return `Corrida fraca: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
+}
 // ===============================
 // PONTE
 // ===============================
