@@ -194,6 +194,14 @@ body {
 .card.destaque {
   border-color: rgba(124,252,0,.7);
 }
+#insights-historico {
+  margin-top: 15px;
+}
+
+#insights-historico p {
+  margin: 4px 0;
+  font-size: 14px;
+}
 
 /* STATUS */
 .status-positivo { border-color: rgba(124,252,0,.75) !important; }

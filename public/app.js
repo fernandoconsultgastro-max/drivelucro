@@ -905,6 +905,76 @@ function aplicarStatusVisual(r) {
   }
 }
 
+function calcularInsightsHistorico() {
+  let historico = JSON.parse(localStorage.getItem("historicoSimulador")) || [];
+
+  if (!historico.length) return null;
+
+  let aceitar = 0, analisar = 0, recusar = 0;
+  let horas = {};
+  let somaKm = 0, somaHora = 0, somaNota = 0;
+
+  historico.forEach(item => {
+    if (item.decisao === "ACEITAR") aceitar++;
+    if (item.decisao === "ANALISAR") analisar++;
+    if (item.decisao === "RECUSAR") recusar++;
+
+    const hora = item.hora?.split(":")[0];
+    if (hora) horas[hora] = (horas[hora] || 0) + 1;
+
+    somaKm += item.valorKm || 0;
+    somaHora += item.valorHora || 0;
+    somaNota += item.nota || 0;
+  });
+
+  const total = historico.length;
+
+  const melhorHora = Object.entries(horas).sort((a,b)=>b[1]-a[1])[0]?.[0];
+
+  const mediaKm = somaKm / total;
+  const mediaHora = somaHora / total;
+  const mediaNota = somaNota / total;
+
+  let gargalo = "equilíbrio";
+  if (mediaKm < mediaHora && mediaKm < mediaNota) gargalo = "km";
+  else if (mediaHora < mediaKm && mediaHora < mediaNota) gargalo = "hora";
+  else if (mediaNota < mediaKm && mediaNota < mediaHora) gargalo = "nota";
+
+  return {
+    aceitarPct: Math.round((aceitar/total)*100),
+    analisarPct: Math.round((analisar/total)*100),
+    recusarPct: Math.round((recusar/total)*100),
+    melhorHora,
+    gargalo
+  };
+}
+
+function renderizarInsights() {
+  const box = pegarElemento("insights-conteudo");
+  if (!box) return;
+
+  const dados = calcularInsightsHistorico();
+
+  if (!dados) {
+    box.innerHTML = "<p>Sem dados suficientes.</p>";
+    return;
+  }
+
+  box.innerHTML = `
+    <p>✔ Aceitas: ${dados.aceitarPct}%</p>
+    <p>⚠ Análise: ${dados.analisarPct}%</p>
+    <p>❌ Recusadas: ${dados.recusarPct}%</p>
+    <p>⏰ Melhor horário: ${dados.melhorHora || "--"}h</p>
+    <p>🎯 Gargalo principal: ${dados.gargalo}</p>
+    <p><strong>💡 Sugestão:</strong> ${
+      dados.gargalo === "km" ? "Aumente o valor mínimo por km." :
+      dados.gargalo === "hora" ? "Aumente o valor mínimo por hora." :
+      dados.gargalo === "nota" ? "Ajuste a nota mínima." :
+      "Mantenha o equilíbrio."
+    }</p>
+  `;
+}
+
 function atualizarRelatorios(r) {
   pegarElemento("rel-total-corridas").textContent = r.totalCorridas;
   pegarElemento("rel-ticket-medio").textContent = moeda(r.ticketMedio);
