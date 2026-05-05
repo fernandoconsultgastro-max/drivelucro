@@ -1096,53 +1096,50 @@ function salvarHistoricoSimulador(item) {
 }
 
 function calcularLogicaSemaforo(pctKm, pctHora, pctNota) {
-
-  const limitar = (v) => Math.min(Number(v || 0), 100);
+  const limitar = valor => Math.min(Number(valor || 0), 100);
 
   const km = limitar(pctKm);
   const hora = limitar(pctHora);
   const nota = limitar(pctNota);
 
-  // 🎯 COR POR FAIXA
-  function corPorPercentual(p) {
-    if (p <= 35) return "vermelho";
-    if (p <= 49) return "amarelo";
+  function corGanho(percentual) {
+    if (percentual < 50) return "vermelho";
+    if (percentual < 100) return "amarelo";
     return "verde";
   }
 
-  const corKm = corPorPercentual(km);
-  const corHora = corPorPercentual(hora);
-  const corNota = corPorPercentual(nota);
+  function corNota(percentual) {
+    if (percentual < 80) return "vermelho";
+    if (percentual < 100) return "amarelo";
+    return "verde";
+  }
 
-  // 🎯 MÉDIA FINAL
+  const corKm = corGanho(km);
+  const corHora = corGanho(hora);
+  const corNotaFinal = corNota(nota);
+
   const media = Math.round((km + hora + nota) / 3);
 
   let decisao = "ACEITAR";
 
-  // 🔴 REGRA 1 — qualquer vermelho domina
-  if (corKm === "vermelho" || corHora === "vermelho" || corNota === "vermelho") {
+  if (
+    corKm === "vermelho" ||
+    corHora === "vermelho" ||
+    corNotaFinal === "vermelho"
+  ) {
     decisao = "RECUSAR";
-  }
-
-  // 🟡 REGRA 2 — qualquer amarelo OU média intermediária
-  else if (
+  } else if (
     corKm === "amarelo" ||
     corHora === "amarelo" ||
-    corNota === "amarelo" ||
-    (media >= 36 && media <= 49)
+    corNotaFinal === "amarelo"
   ) {
     decisao = "ANALISAR";
-  }
-
-  // 🟢 REGRA 3 — tudo acima de 50
-  else if (media >= 50) {
-    decisao = "ACEITAR";
   }
 
   return {
     corKm,
     corHora,
-    corNota,
+    corNota: corNotaFinal,
     media,
     decisao
   };
