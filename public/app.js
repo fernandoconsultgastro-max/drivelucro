@@ -2600,7 +2600,13 @@ function renderizarResultadoCopiloto(pacote) {
 
   if (overlay) {
     overlay.classList.remove("oculto");
-    overlay.innerHTML = html;
+overlay.innerHTML = html;
+
+clearTimeout(window.copilotoOverlayTimer);
+
+window.copilotoOverlayTimer = setTimeout(() => {
+  overlay.classList.add("oculto");
+}, 8000);
   }
 }
 
