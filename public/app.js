@@ -643,43 +643,26 @@ function calcularResumo() {
 
   const faturamento = corridasPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
   const custosVariaveis = custosPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
-  const kmCorridas = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
+  const km = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
   const tempo = corridasPeriodo.reduce((t, c) => t + Number(c.tempo || 0), 0);
 
-  const custoKmVeiculo = Number(dadosVeiculo?.custoKmReal || 0);
-  const custoEstimado = kmCorridas * custoKmVeiculo;
-
-  const fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
-  const fechamentoPeriodo = filtrarPorPeriodo(fechamentos);
-
-  const custoReal = fechamentoPeriodo.length
-    ? fechamentoPeriodo.reduce((t, f) => t + Number(f.custoDia || 0), 0)
-    : custoEstimado;
-
-  const kmReal = fechamentoPeriodo.length
-    ? fechamentoPeriodo.reduce((t, f) => t + Number(f.kmRodado || 0), 0)
-    : kmCorridas;
-
-  const lucroReal = faturamento - custosVariaveis - custoReal;
+  const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
+  const custoRodagem = km > 0 && custoKm > 0 ? km * custoKm : 0;
+  const custoTotal = custosVariaveis + custoRodagem;
+  const lucro = faturamento - custoTotal;
 
   return {
     faturamento,
-    custosTotal: custosVariaveis + custoReal,
+    custosTotal: custoTotal,
     custosVariaveis,
-    custoRodagem: custoReal,
-    lucro: lucroReal,
-    custoEstimado,
-    lucroEstimado: faturamento - custosVariaveis - custoEstimado,
-    custoReal,
-    lucroReal,
-    km: kmCorridas,
-    kmCorridas,
-    kmReal,
+    custoRodagem,
+    lucro,
+    km,
     tempo,
-    valorKm: kmCorridas > 0 ? faturamento / kmCorridas : 0,
+    valorKm: km > 0 ? faturamento / km : 0,
     valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
     ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
-    custoKm: custoKmVeiculo,
+    custoKm,
     totalCorridas: corridasPeriodo.length
   };
 }
