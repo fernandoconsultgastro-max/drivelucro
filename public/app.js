@@ -1307,31 +1307,56 @@ function configurarSimulador() {
   });
 }
 
-// ---------- PARSER AUTOMÁTICO ----------
-function configurarParserChamada() {
+function processarTextoChamada() {
   const textarea = pegarElemento("texto-chamada");
-  const botao = pegarElemento("btn-processar-chamada");
+  const seletorApp = pegarElemento("app-leitor");
 
-  if (!textarea || !botao) return;
+  if (!textarea || !seletorApp) return;
 
-  botao.addEventListener("click", () => {
-    const dados = extrairDadosChamada(textarea.value);
+  const texto = textarea.value.trim();
 
-    if (!dados.valor || !dados.km || !dados.tempo) {
-      alert("Não consegui ler a chamada.");
+  if (!texto) {
+    alert("Cole os dados da chamada.");
+    return;
+  }
+
+  let dados = null;
+
+  // 🔥 Seleção por app
+  switch (seletorApp.value) {
+    case "uber":
+      dados = parseUber(texto);
+      break;
+
+    case "99":
+      dados = parse99(texto);
+      break;
+
+    case "indrive":
+      alert("Leitor inDrive em desenvolvimento.");
       return;
-    }
 
-    pegarElemento("sim-valor").value = dados.valor;
-    pegarElemento("sim-km").value = dados.km;
-    pegarElemento("sim-tempo").value = dados.tempo;
-    pegarElemento("sim-nota").value = dados.nota;
+    default:
+      alert("Selecione um app.");
+      return;
+  }
 
-    pegarElemento("form-simulador")
-      .dispatchEvent(new Event("submit"));
+  // 🚨 Validação mínima
+  if (!dados || !dados.valor || !dados.kmTotal || !dados.tempoTotal) {
+    alert("Não consegui interpretar a chamada.");
+    return;
+  }
 
-    textarea.value = "";
-  });
+  // 🔥 envia para motor existente
+  const resultado = analisarChamada(
+    dados.valor,
+    dados.kmTotal,
+    dados.tempoTotal,
+    Number(dadosVeiculo?.custoKmReal || 0),
+    dados.nota
+  );
+
+  renderizarResultadoSimulador(resultado, dados);
 }
 
 // BLOCO 43 — RESET PROFISSIONAL
