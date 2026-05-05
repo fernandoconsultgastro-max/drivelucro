@@ -2243,46 +2243,37 @@ return {
 // ===============================
 
 function calcularIndicadores(dados) {
-  const valorPorKm = dados.kmTotal > 0 ? dados.valor / dados.kmTotal : 0;
-  const valorPorHora = dados.tempoTotal > 0 ? (dados.valor / dados.tempoTotal) * 60 : 0;
+  const kmAte = dados.kmAte || 0;
+  const kmViagem = dados.kmViagem || 0;
+
+  const tempoAte = dados.tempoAte || 0;
+  const tempoViagem = dados.tempoViagem || 0;
+
+  const kmTotal = kmAte + kmViagem;
+  const tempoTotal = tempoAte + tempoViagem;
+
+  // Peso: deslocamento até passageiro vale menos
+  const kmPonderado = kmViagem + (kmAte * 0.6);
+
+  // Penaliza tempo morto (até passageiro)
+  const tempoPonderado = tempoViagem + (tempoAte * 1.2);
+
+  const valorPorKmReal = kmPonderado > 0
+    ? dados.valor / kmPonderado
+    : 0;
+
+  const valorPorHoraReal = tempoPonderado > 0
+    ? (dados.valor / tempoPonderado) * 60
+    : 0;
 
   return {
-    valorPorKm,
-    valorPorHora
+    valorPorKm: valorPorKmReal,
+    valorPorHora: valorPorHoraReal,
+    kmTotal,
+    tempoTotal,
+    kmPonderado,
+    tempoPonderado
   };
-}
-
-function avaliarRegra(valor, meta) {
-  if (valor >= meta) return "verde";
-  if (valor >= meta * 0.5) return "amarelo";
-  return "vermelho";
-}
-
-function avaliarNota(nota, notaMinima) {
-  if (nota >= notaMinima) return "verde";
-  if (nota >= notaMinima * 0.8) return "amarelo";
-  return "vermelho";
-}
-
-function decisaoFinal(statusKm, statusHora, statusNota) {
-  if ([statusKm, statusHora, statusNota].includes("vermelho")) return "RECUSAR";
-  if ([statusKm, statusHora, statusNota].includes("amarelo")) return "ANALISAR";
-  return "ACEITAR";
-}
-
-function gerarMensagem(decisao, indicadores, dados) {
-  const km = indicadores.valorPorKm.toFixed(2);
-  const hora = indicadores.valorPorHora.toFixed(2);
-
-  if (decisao === "ACEITAR") {
-    return `Boa corrida: R$ ${km}/km e R$ ${hora}/hora.`;
-  }
-
-  if (decisao === "ANALISAR") {
-    return `Atenção: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
-  }
-
-  return `Corrida fraca: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
 }
 
 // ===============================
