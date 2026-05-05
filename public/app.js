@@ -637,47 +637,59 @@ function configurarMenu() {
 // ===============================
 // RESUMO
 // ===============================
-function calcularResumo() {
-  const corridasPeriodo = filtrarPorPeriodo(corridas);
-  const custosPeriodo = filtrarPorPeriodo(custos);
+const faturamento = corridasPeriodo.reduce((t, c) => {
+  return t + Number(c.valor || 0);
+}, 0);
 
-  const faturamento = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.valor || 0);
-  }, 0);
+const kmCorridas = corridasPeriodo.reduce((t, c) => {
+  return t + Number(c.km || 0);
+}, 0);
 
-  const custosVariaveis = custosPeriodo.reduce((t, c) => {
-    return t + Number(c.valor || 0);
-  }, 0);
+const tempo = corridasPeriodo.reduce((t, c) => {
+  return t + Number(c.tempo || 0);
+}, 0);
 
-  const km = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.km || 0);
-  }, 0);
+// 🔥 CUSTO DO VEÍCULO
+const custoKmVeiculo = Number(dadosVeiculo?.custoKmReal || 0);
 
-  const tempo = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.tempo || 0);
-  }, 0);
+// 🔵 CUSTO ESTIMADO (baseado nas corridas)
+const custoEstimado = kmCorridas * custoKmVeiculo;
 
-  const custoKm = Number(dadosVeiculo?.custoKmReal || 0);
-  const custoRodagem = km > 0 && custoKm > 0 ? km * custoKm : 0;
+// 🔴 CUSTO REAL (se tiver fechamento do dia)
+const fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
+const fechamentoHoje = fechamentos.find(f => f.data === dataHoje());
 
-  const custoTotal = custosVariaveis + custoRodagem;
-  const lucro = faturamento - custoTotal;
+const kmReal = fechamentoHoje ? Number(fechamentoHoje.kmRodado) : kmCorridas;
+const custoReal = kmReal * custoKmVeiculo;
 
-  return {
-    faturamento,
-    custosTotal: custoTotal,
-    custosVariaveis,
-    custoRodagem,
-    lucro,
-    km,
-    tempo,
-    valorKm: km > 0 ? faturamento / km : 0,
-    valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
-    ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
-    custoKm,
-    totalCorridas: corridasPeriodo.length
-  };
-}
+// 💰 LUCROS
+const lucroEstimado = faturamento - custoEstimado;
+const lucroReal = faturamento - custoReal;
+
+// 📊 MÉTRICAS
+const valorKm = kmCorridas > 0 ? faturamento / kmCorridas : 0;
+const valorHora = tempo > 0 ? faturamento / (tempo / 60) : 0;
+
+return {
+  faturamento,
+
+  // 🔵 estimado (tempo real)
+  custoEstimado,
+  lucroEstimado,
+
+  // 🔴 real (fechamento)
+  custoReal,
+  lucroReal,
+
+  kmCorridas,
+  kmReal,
+  tempo,
+
+  valorKm,
+  valorHora,
+
+  totalCorridas: corridasPeriodo.length
+};
 // ===============================
 // DASHBOARD
 // ===============================
@@ -717,7 +729,7 @@ if (elFaturamento) elFaturamento.textContent = moeda(faturamento);
 
 if (elCustos) elCustos.textContent = moeda(custoTotal);
 
-if (elLucro) elLucro.textContent = moeda(lucro);
+if (elLucro) elLucro.textContent = moeda(r.lucroReal);
 
 if (elKmTotal) elKmTotal.textContent = `${km.toFixed(1)} km`;
 
