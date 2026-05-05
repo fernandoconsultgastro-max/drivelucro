@@ -1491,7 +1491,11 @@ function processarTextoChamada() {
     dados.nota
   );
 
-  renderizarResultadoSimulador(resultado, dados);
+ renderizarResultadoSimulador(resultado, dados);
+
+// COPILOTO AUTOMÁTICO — integrado ao leitor de chamadas
+const pacoteCopiloto = gerarPacoteCopiloto(texto);
+renderizarResultadoCopiloto(pacoteCopiloto);
 }
 
 // BLOCO 43 — RESET PROFISSIONAL
