@@ -1237,8 +1237,8 @@ const decisaoFinal = semaforo.decisao;
       </div>
 
       <div class="drive-info">
-        <span>${Number(dados.tempo).toFixed(0)} min</span>
-        <span>${Number(dados.km).toFixed(1)} km</span>
+       <span>${Number(dados.tempo ?? dados.tempoTotal).toFixed(0)} min</span>
+       <span>${Number(dados.km ?? dados.kmTotal).toFixed(1)} km</span>
       </div>
 
       <div class="drive-decisao ${decisaoFinal.toLowerCase()}">
