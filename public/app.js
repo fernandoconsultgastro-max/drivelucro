@@ -2195,10 +2195,6 @@ function calcularDesempenho() {
 // e decisão final (ACEITAR / ANALISAR / RECUSAR)
 // ===============================
 
-// ===============================
-// BASE
-// ===============================
-
 function normalizarTextoTela(texto) {
   return String(texto || "")
     .replace(/\s+/g, " ")
@@ -2354,8 +2350,22 @@ function executarCopilotoTeste() {
     return;
   }
 
-  const pacote = gerarPacoteCopiloto(entrada);
+  const pacote = window.gerarPacoteCopiloto
+    ? window.gerarPacoteCopiloto(entrada)
+    : gerarPacoteCopiloto(entrada);
 
   document.getElementById("saida-copiloto").textContent =
     JSON.stringify(pacote, null, 2);
 }
+
+// EXPÕE FUNÇÕES DO COPILOTO NO ESCOPO GLOBAL PARA TESTE NO CONSOLE
+window.normalizarTextoTela = normalizarTextoTela;
+window.detectarAplicativo = detectarAplicativo;
+window.extrairDadosBasicos = extrairDadosBasicos;
+window.calcularIndicadores = calcularIndicadores;
+window.avaliarRegra = avaliarRegra;
+window.avaliarNota = avaliarNota;
+window.decisaoFinal = decisaoFinal;
+window.gerarMensagem = gerarMensagem;
+window.gerarPacoteCopiloto = gerarPacoteCopiloto;
+window.executarCopilotoTeste = executarCopilotoTeste;
