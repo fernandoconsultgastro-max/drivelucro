@@ -2322,6 +2322,68 @@ function decisaoFinal(statusKm, statusHora, statusNota) {
   return "ACEITAR";
 }
 
+function aplicarModoPro(decisaoBase, dados, indicadores, regras) {
+  const modoProAtivo = localStorage.getItem("modoProCopiloto") === "true";
+
+  if (!modoProAtivo) {
+    return {
+      decisao: decisaoBase,
+      modoPro: false,
+      motivoPro: "Modo PRO desligado."
+    };
+  }
+
+  let decisao = decisaoBase;
+  const motivos = [];
+
+  const kmAte = Number(dados.kmAte || 0);
+  const tempoAte = Number(dados.tempoAte || 0);
+  const lucro = Number(indicadores.lucro || 0);
+  const lucroPorKm = Number(indicadores.lucroPorKm || 0);
+  const lucroPorHora = Number(indicadores.lucroPorHora || 0);
+
+  if (lucro <= 0) {
+    decisao = "RECUSAR";
+    motivos.push("prejuízo real");
+  }
+
+  if (kmAte > 3 && lucroPorKm < regras.metaKm) {
+    decisao = "RECUSAR";
+    motivos.push("deslocamento alto até o passageiro");
+  }
+
+  if (tempoAte > 8 && lucroPorHora < regras.metaHora) {
+    decisao = "RECUSAR";
+    motivos.push("tempo morto alto");
+  }
+
+  if (decisao === "ACEITAR" && lucroPorKm < regras.metaKm * 1.15) {
+    decisao = "ANALISAR";
+    motivos.push("lucro por km próximo do limite");
+  }
+
+  if (decisao === "ACEITAR" && lucroPorHora < regras.metaHora * 1.15) {
+    decisao = "ANALISAR";
+    motivos.push("lucro por hora próximo do limite");
+  }
+
+  return {
+    decisao,
+    modoPro: true,
+    motivoPro: motivos.length
+      ? motivos.join(", ")
+      : "corrida aprovada pelos critérios PRO"
+  };
+}
+
+function ativarModoProCopiloto() {
+  localStorage.setItem("modoProCopiloto", "true");
+}
+
+function desativarModoProCopiloto() {
+  localStorage.setItem("modoProCopiloto", "false");
+}
+
 function gerarMensagem(decisao, indicadores, dados) {
   const km = Number(indicadores.valorPorKm || 0).toFixed(2);
   const hora = Number(indicadores.valorPorHora || 0).toFixed(2);
@@ -2390,7 +2452,9 @@ function gerarPacoteCopiloto(texto) {
   const statusHora = avaliarRegra(indicadores.valorPorHora, regras.metaHora);
   const statusNota = avaliarNota(dados.nota, regras.notaMinima);
 
-  const decisao = decisaoFinal(statusKm, statusHora, statusNota);
+ const decisaoBase = decisaoFinal(statusKm, statusHora, statusNota);
+ const analisePro = aplicarModoPro(decisaoBase, dados, indicadores, regras);
+ const decisao = analisePro.decisao;
 
   return {
     sucesso: true,
@@ -2405,7 +2469,9 @@ function gerarPacoteCopiloto(texto) {
       hora: statusHora,
       nota: statusNota
     },
-    regras
+   regras,
+   modoPro: analisePro.modoPro,
+  motivoPro: analisePro.motivoPro
   };
 }
 
@@ -2449,6 +2515,8 @@ window.avaliarNota = avaliarNota;
 window.decisaoFinal = decisaoFinal;
 window.gerarMensagem = gerarMensagem;
 window.gerarPacoteCopiloto = gerarPacoteCopiloto;
+window.ativarModoProCopiloto = ativarModoProCopiloto;
+window.desativarModoProCopiloto = desativarModoProCopiloto;
 window.executarCopilotoTeste = executarCopilotoTeste;
 
 function renderizarResultadoCopiloto(pacote) {
