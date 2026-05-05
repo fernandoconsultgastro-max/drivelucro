@@ -111,10 +111,6 @@ function pegarElemento(id) {
   return document.getElementById(id);
 }
 
-function moeda(v) {
-  return `R$ ${Number(v || 0).toFixed(2)}`;
-}
-
 // ===============================
 // BLOCO PREMIUM 03 — COPILOTO INTELIGENTE
 // MANUTENÇÃO:
@@ -755,7 +751,7 @@ if (elFaturamento) elFaturamento.textContent = moeda(faturamento);
 
 if (elCustos) elCustos.textContent = moeda(custoTotal);
 
-if (elLucro) elLucro.textContent = moeda(r.lucroReal);
+if (elLucro) elLucro.textContent = moeda(lucro);
 
 if (elKmTotal) elKmTotal.textContent = `${km.toFixed(1)} km`;
 
