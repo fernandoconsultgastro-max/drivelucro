@@ -1821,7 +1821,7 @@ function init() {
   configurarCardsDashboard();
   configurarFiltroPeriodo();
   configurarRegras();
-  configurarParserChamada();
+  configurarLeitorChamada();
   renderizarHistoricoChamadas();
   configurarControleData();
   configurarCustoVeiculo();
@@ -1858,6 +1858,14 @@ function renderizarHistoricoChamadas() {
       <p>${Number(item.tempo).toFixed(0)} min • ${Number(item.km).toFixed(1)} km • Nota ${Number(item.nota).toFixed(1)}</p>
     </div>
   `).join("");
+}
+
+function configurarLeitorChamada() {
+  const botao = pegarElemento("btn-processar-chamada");
+
+  if (!botao) return;
+
+  botao.addEventListener("click", processarTextoChamada);
 }
 
 document.addEventListener("DOMContentLoaded", init);
