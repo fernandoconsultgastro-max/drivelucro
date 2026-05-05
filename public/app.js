@@ -2188,3 +2188,70 @@ function calcularDesempenho() {
     lucro: totalLucro
   };
 }
+
+
+function gerarPacoteCopiloto(texto) {
+  const dados = extrairDadosBasicos(texto);
+
+  const sucesso =
+    dados.valor > 0 &&
+    dados.kmTotal > 0 &&
+    dados.tempoTotal > 0;
+
+  if (!sucesso) {
+    return {
+      sucesso: false,
+      app: dados.app,
+      decisao: "INDEFINIDO",
+      mensagem: "Não foi possível extrair valor, km ou tempo da tela.",
+      dados
+    };
+  }
+
+  const indicadores = calcularIndicadores(dados);
+
+  const regras = {
+    perfil: "equilibrado",
+    metaKm: 2.5,
+    metaHora: 50,
+    notaMinima: 4.5
+  };
+
+  const statusKm = avaliarRegra(indicadores.valorPorKm, regras.metaKm);
+  const statusHora = avaliarRegra(indicadores.valorPorHora, regras.metaHora);
+  const statusNota = avaliarNota(dados.nota, regras.notaMinima);
+
+  const decisao = decisaoFinal(statusKm, statusHora, statusNota);
+
+  return {
+    sucesso: true,
+    origem: "leitura_tela_simulada",
+    app: dados.app,
+    decisao,
+    mensagem: gerarMensagem(decisao, indicadores, dados),
+    dados,
+    indicadores,
+    status: {
+      km: statusKm,
+      hora: statusHora,
+      nota: statusNota
+    },
+    regras
+  };
+}
+// ===============================
+// COPILOTO - TESTE PWA (ISOLADO)
+// ===============================
+
+function executarCopilotoTeste() {
+  const entrada = document.getElementById("entrada-copiloto").value;
+
+  if (!entrada.trim()) {
+    alert("Cole o texto da corrida");
+    return;
+  }
+
+  const pacote = gerarPacoteCopiloto(entrada);
+
+  document.getElementById("saida-copiloto").textContent = JSON.stringify(pacote, null, 2);
+}
