@@ -1971,6 +1971,7 @@ function init() {
   renderizar();
   atualizarDashboard();
   abrirTela("dashboard");
+  atualizarBotaoModoPro();
 
   setTimeout(finalizarSplash, 1200);
 }
