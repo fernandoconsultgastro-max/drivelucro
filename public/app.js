@@ -2188,7 +2188,109 @@ function calcularDesempenho() {
     lucro: totalLucro
   };
 }
+// ===============================
+// BLOCO 43 — COPILOTO (BASE + MOTOR + PONTE + TESTE)
+// MANUTENÇÃO:
+// Implementa leitura de texto, parsing, cálculo de indicadores
+// e decisão final (ACEITAR / ANALISAR / RECUSAR)
+// ===============================
 
+// ===============================
+// BASE
+// ===============================
+
+function normalizarTextoTela(texto) {
+  return String(texto || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function detectarAplicativo(texto) {
+  const t = normalizarTextoTela(texto).toLowerCase();
+
+  if (t.includes("uber")) return "uber";
+  if (t.includes("99")) return "99";
+  if (t.includes("indrive") || t.includes("in drive")) return "indrive";
+
+  return "desconhecido";
+}
+
+function extrairDadosBasicos(texto) {
+  const t = normalizarTextoTela(texto);
+
+  const valores = [...t.matchAll(/R\$\s*([\d.,]+)/gi)].map(m =>
+    Number(m[1].replace(".", "").replace(",", "."))
+  );
+
+  const kms = [...t.matchAll(/([\d.,]+)\s*km/gi)].map(m =>
+    Number(m[1].replace(",", "."))
+  );
+
+  const minutos = [...t.matchAll(/(\d+)\s*min/gi)].map(m =>
+    Number(m[1])
+  );
+
+  const notaMatch = t.match(/([\d.,]+)\s*★/);
+
+  return {
+    app: detectarAplicativo(t),
+    valor: valores[0] || 0,
+    kmTotal: kms.reduce((acc, n) => acc + n, 0),
+    tempoTotal: minutos.reduce((acc, n) => acc + n, 0),
+    nota: notaMatch ? Number(notaMatch[1].replace(",", ".")) : 0
+  };
+}
+
+// ===============================
+// MOTOR
+// ===============================
+
+function calcularIndicadores(dados) {
+  const valorPorKm = dados.kmTotal > 0 ? dados.valor / dados.kmTotal : 0;
+  const valorPorHora = dados.tempoTotal > 0 ? (dados.valor / dados.tempoTotal) * 60 : 0;
+
+  return {
+    valorPorKm,
+    valorPorHora
+  };
+}
+
+function avaliarRegra(valor, meta) {
+  if (valor >= meta) return "verde";
+  if (valor >= meta * 0.5) return "amarelo";
+  return "vermelho";
+}
+
+function avaliarNota(nota, notaMinima) {
+  if (nota >= notaMinima) return "verde";
+  if (nota >= notaMinima * 0.8) return "amarelo";
+  return "vermelho";
+}
+
+function decisaoFinal(statusKm, statusHora, statusNota) {
+  if ([statusKm, statusHora, statusNota].includes("vermelho")) return "RECUSAR";
+  if ([statusKm, statusHora, statusNota].includes("amarelo")) return "ANALISAR";
+  return "ACEITAR";
+}
+
+function gerarMensagem(decisao, indicadores, dados) {
+  const km = indicadores.valorPorKm.toFixed(2);
+  const hora = indicadores.valorPorHora.toFixed(2);
+
+  if (decisao === "ACEITAR") {
+    return `Boa corrida: R$ ${km}/km e R$ ${hora}/hora.`;
+  }
+
+  if (decisao === "ANALISAR") {
+    return `Atenção: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
+  }
+
+  return `Corrida fraca: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
+}
+
+// ===============================
+// PONTE
+// ===============================
 
 function gerarPacoteCopiloto(texto) {
   const dados = extrairDadosBasicos(texto);
@@ -2239,8 +2341,9 @@ function gerarPacoteCopiloto(texto) {
     regras
   };
 }
+
 // ===============================
-// COPILOTO - TESTE PWA (ISOLADO)
+// TESTE PWA
 // ===============================
 
 function executarCopilotoTeste() {
@@ -2253,5 +2356,6 @@ function executarCopilotoTeste() {
 
   const pacote = gerarPacoteCopiloto(entrada);
 
-  document.getElementById("saida-copiloto").textContent = JSON.stringify(pacote, null, 2);
+  document.getElementById("saida-copiloto").textContent =
+    JSON.stringify(pacote, null, 2);
 }
