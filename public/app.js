@@ -641,37 +641,24 @@ function calcularResumo() {
   const corridasPeriodo = filtrarPorPeriodo(corridas);
   const custosPeriodo = filtrarPorPeriodo(custos);
 
-  const faturamento = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.valor || 0);
-  }, 0);
-
-  const custosVariaveis = custosPeriodo.reduce((t, c) => {
-    return t + Number(c.valor || 0);
-  }, 0);
-
-  const kmCorridas = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.km || 0);
-  }, 0);
-
-  const tempo = corridasPeriodo.reduce((t, c) => {
-    return t + Number(c.tempo || 0);
-  }, 0);
+  const faturamento = corridasPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
+  const custosVariaveis = custosPeriodo.reduce((t, c) => t + Number(c.valor || 0), 0);
+  const kmCorridas = corridasPeriodo.reduce((t, c) => t + Number(c.km || 0), 0);
+  const tempo = corridasPeriodo.reduce((t, c) => t + Number(c.tempo || 0), 0);
 
   const custoKmVeiculo = Number(dadosVeiculo?.custoKmReal || 0);
-
   const custoEstimado = kmCorridas * custoKmVeiculo;
-  const lucroEstimado = faturamento - custosVariaveis - custoEstimado;
 
   const fechamentos = JSON.parse(localStorage.getItem("fechamentos")) || [];
   const fechamentoPeriodo = filtrarPorPeriodo(fechamentos);
 
-  const kmReal = fechamentoPeriodo.length
-    ? fechamentoPeriodo.reduce((t, f) => t + Number(f.kmRodado || 0), 0)
-    : kmCorridas;
-
   const custoReal = fechamentoPeriodo.length
     ? fechamentoPeriodo.reduce((t, f) => t + Number(f.custoDia || 0), 0)
     : custoEstimado;
+
+  const kmReal = fechamentoPeriodo.length
+    ? fechamentoPeriodo.reduce((t, f) => t + Number(f.kmRodado || 0), 0)
+    : kmCorridas;
 
   const lucroReal = faturamento - custosVariaveis - custoReal;
 
@@ -681,17 +668,14 @@ function calcularResumo() {
     custosVariaveis,
     custoRodagem: custoReal,
     lucro: lucroReal,
-
     custoEstimado,
-    lucroEstimado,
+    lucroEstimado: faturamento - custosVariaveis - custoEstimado,
     custoReal,
     lucroReal,
-
     km: kmCorridas,
     kmCorridas,
     kmReal,
     tempo,
-
     valorKm: kmCorridas > 0 ? faturamento / kmCorridas : 0,
     valorHora: tempo > 0 ? faturamento / (tempo / 60) : 0,
     ticketMedio: corridasPeriodo.length > 0 ? faturamento / corridasPeriodo.length : 0,
