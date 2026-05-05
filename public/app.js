@@ -2216,28 +2216,43 @@ function detectarAplicativo(texto) {
 }
 
 function extrairDadosBasicos(texto) {
+  const t = normalizarTextoTela(texto);
+
+  const valores = [...t.matchAll(/R\$\s*([\d.,]+)/gi)].map(m =>
+    Number(m[1].replace(".", "").replace(",", "."))
+  );
+
+  const kms = [...t.matchAll(/([\d.,]+)\s*km/gi)].map(m =>
+    Number(m[1].replace(",", "."))
+  );
+
+  const minutos = [...t.matchAll(/(\d+)\s*min/gi)].map(m =>
+    Number(m[1])
+  );
+
+  const notaMatch = t.match(/([\d.,]+)\s*★/);
+
   const tempoAte = minutos[0] || 0;
-const tempoViagem = minutos[1] || 0;
+  const tempoViagem = minutos[1] || 0;
 
-const kmAte = kms[0] || 0;
-const kmViagem = kms[1] || 0;
+  const kmAte = kms[0] || 0;
+  const kmViagem = kms[1] || 0;
 
-return {
-  app: detectarAplicativo(t),
-  valor: valores[0] || 0,
+  return {
+    app: detectarAplicativo(t),
+    valor: valores[0] || 0,
 
-  tempoAte,
-  tempoViagem,
-  tempoTotal: tempoAte + tempoViagem,
+    tempoAte,
+    tempoViagem,
+    tempoTotal: tempoAte + tempoViagem,
 
-  kmAte,
-  kmViagem,
-  kmTotal: kmAte + kmViagem,
+    kmAte,
+    kmViagem,
+    kmTotal: kmAte + kmViagem,
 
-  nota: notaMatch ? Number(notaMatch[1].replace(",", ".")) : 0
-};
+    nota: notaMatch ? Number(notaMatch[1].replace(",", ".")) : 0
+  };
 }
-
 // ===============================
 // MOTOR
 // ===============================
@@ -2276,6 +2291,23 @@ function calcularIndicadores(dados) {
   };
 }
 
+function avaliarRegra(valor, meta) {
+  if (valor >= meta) return "verde";
+  if (valor >= meta * 0.5) return "amarelo";
+  return "vermelho";
+}
+
+function avaliarNota(nota, notaMinima) {
+  if (nota >= notaMinima) return "verde";
+  if (nota >= notaMinima * 0.8) return "amarelo";
+  return "vermelho";
+}
+
+function decisaoFinal(statusKm, statusHora, statusNota) {
+  if ([statusKm, statusHora, statusNota].includes("vermelho")) return "RECUSAR";
+  if ([statusKm, statusHora, statusNota].includes("amarelo")) return "ANALISAR";
+  return "ACEITAR";
+}
 // ===============================
 // PONTE
 // ===============================
