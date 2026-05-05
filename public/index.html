@@ -272,15 +272,22 @@ Foco: leitura rápida, decisão e impacto visual
 
         <div id="historico-chamadas"></div>
       </div>
+      
+     <!-- REGRAS -->
+<div class="regras-box">
+  <h3>Minhas regras</h3>
 
-      <!-- REGRAS -->
-      <div class="regras-box">
-        <h3>Minhas regras</h3>
-        <input id="regra-valor-km" placeholder="Valor mínimo por km">
-        <input id="regra-valor-hora" placeholder="Valor mínimo por hora">
-        <input id="regra-km-max" placeholder="Km máximo">
-        <input id="regra-nota" placeholder="Nota mínima">
-      </div>
+  <select id="perfil-regra">
+    <option value="equilibrado">Equilibrado</option>
+    <option value="conservador">Conservador</option>
+    <option value="agressivo">Agressivo</option>
+    <option value="personalizado">Personalizado</option>
+  </select>
+
+  <input id="regra-valor-km" placeholder="Valor mínimo por km">
+  <input id="regra-valor-hora" placeholder="Valor mínimo por hora">
+  <input id="regra-nota" placeholder="Nota mínima do passageiro">
+</div>
 
       <!-- FORM -->
     <form id="form-simulador">

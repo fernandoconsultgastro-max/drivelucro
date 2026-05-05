@@ -585,30 +585,80 @@ function configurarCustoVeiculo() {
 // Mantém apenas placeholder visual até o motorista definir regras.
 // ===============================
 function configurarRegras() {
+  const perfil = pegarElemento("perfil-regra");
   const valorKm = pegarElemento("regra-valor-km");
   const valorHora = pegarElemento("regra-valor-hora");
-  const kmMax = pegarElemento("regra-km-max");
   const nota = pegarElemento("regra-nota");
 
-  if (!valorKm || !valorHora || !kmMax || !nota) return;
+  if (!perfil || !valorKm || !valorHora || !nota) return;
 
-  valorKm.value = regras.valorKmMin > 0 ? String(regras.valorKmMin).replace(".", ",") : "";
-  valorHora.value = regras.valorHoraMin > 0 ? String(regras.valorHoraMin).replace(".", ",") : "";
-  kmMax.value = regras.kmMax > 0 ? String(regras.kmMax).replace(".", ",") : "";
-  nota.value = regras.notaMin > 0 ? String(regras.notaMin).replace(".", ",") : "";
+  const perfis = {
+    conservador: {
+      valorKmMin: 2.0,
+      valorHoraMin: 40,
+      notaMin: 4.7
+    },
+    equilibrado: {
+      valorKmMin: 1.7,
+      valorHoraMin: 30,
+      notaMin: 4.4
+    },
+    agressivo: {
+      valorKmMin: 1.4,
+      valorHoraMin: 25,
+      notaMin: 4.0
+    },
+    personalizado: {
+      valorKmMin: regras.valorKmMin || 0,
+      valorHoraMin: regras.valorHoraMin || 0,
+      notaMin: regras.notaMin || 0
+    }
+  };
 
-  [valorKm, valorHora, kmMax, nota].forEach(input => {
-    input.addEventListener("change", () => {
-    regras.valorKmMin = numeroRegra(valorKm.value);
-    regras.valorHoraMin = numeroRegra(valorHora.value);
-    regras.kmMax = numeroRegra(kmMax.value);
-    regras.notaMin = numeroRegra(nota.value);
+  const perfilSalvo = localStorage.getItem("perfilRegra") || "equilibrado";
+  perfil.value = perfilSalvo;
+
+  function aplicarPerfil(nomePerfil) {
+    const config = perfis[nomePerfil] || perfis.equilibrado;
+
+    regras.valorKmMin = config.valorKmMin;
+    regras.valorHoraMin = config.valorHoraMin;
+    regras.notaMin = config.notaMin;
+    regras.kmMax = 0;
+
+    valorKm.value = String(regras.valorKmMin).replace(".", ",");
+    valorHora.value = String(regras.valorHoraMin).replace(".", ",");
+    nota.value = String(regras.notaMin).replace(".", ",");
+
+    const personalizado = nomePerfil === "personalizado";
+
+    valorKm.readOnly = !personalizado;
+    valorHora.readOnly = !personalizado;
+    nota.readOnly = !personalizado;
+
+    localStorage.setItem("perfilRegra", nomePerfil);
+    localStorage.setItem("regras", JSON.stringify(regras));
+  }
+
+  aplicarPerfil(perfil.value);
+
+  perfil.addEventListener("change", () => {
+    aplicarPerfil(perfil.value);
+  });
+
+  [valorKm, valorHora, nota].forEach(input => {
+    input.addEventListener("input", () => {
+      if (perfil.value !== "personalizado") return;
+
+      regras.valorKmMin = numeroRegra(valorKm.value);
+      regras.valorHoraMin = numeroRegra(valorHora.value);
+      regras.notaMin = numeroRegra(nota.value);
+      regras.kmMax = 0;
 
       localStorage.setItem("regras", JSON.stringify(regras));
     });
   });
 }
-
 // ===============================
 // NAVEGAÇÃO
 // ===============================
