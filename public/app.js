@@ -1893,7 +1893,7 @@ function finalizarSplash() {
 
   setTimeout(() => {
     splash.style.display = "none";
-  }, 500);
+  }, 600);
 }
   function configurarTipoCorridaSimulador() {
   const tipo = pegarElemento("sim-tipo-corrida");

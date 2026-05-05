@@ -1332,3 +1332,123 @@ BLOCO PREMIUM 03 — COPILOTO
 #card-copiloto-teste.oculto {
   display: none !important;
 }
+
+/* ===============================
+   SPLASH PREMIUM
+================================ */
+
+#splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background:
+    radial-gradient(circle at center, rgba(124, 252, 0, 0.10), transparent 34%),
+    linear-gradient(180deg, #020617 0%, #020a12 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#splash-screen.sair {
+  animation: splashFadeOut 0.55s ease forwards;
+}
+
+.splash-glow {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(124, 252, 0, 0.12);
+  filter: blur(45px);
+  animation: glowPulse 1.8s ease-in-out infinite;
+}
+
+.splash-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  animation: splashEntrada 0.75s ease forwards;
+}
+
+.splash-logo {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  margin-bottom: 22px;
+  border-radius: 24px;
+  box-shadow: 0 0 35px rgba(124, 252, 0, 0.25);
+}
+
+.splash-content h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+
+.splash-content h1 span {
+  color: #7CFC00;
+}
+
+.splash-content p {
+  margin-top: 8px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.splash-loader {
+  width: 140px;
+  height: 5px;
+  margin: 26px auto 0;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.splash-loader span {
+  display: block;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #7CFC00, transparent);
+  animation: loaderMove 1.2s ease-in-out infinite;
+}
+
+@keyframes splashEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes splashFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0.85;
+  }
+}
+
+@keyframes loaderMove {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(260%);
+  }
+}
