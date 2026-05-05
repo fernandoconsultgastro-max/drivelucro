@@ -2216,29 +2216,26 @@ function detectarAplicativo(texto) {
 }
 
 function extrairDadosBasicos(texto) {
-  const t = normalizarTextoTela(texto);
+  const tempoAte = minutos[0] || 0;
+const tempoViagem = minutos[1] || 0;
 
-  const valores = [...t.matchAll(/R\$\s*([\d.,]+)/gi)].map(m =>
-    Number(m[1].replace(".", "").replace(",", "."))
-  );
+const kmAte = kms[0] || 0;
+const kmViagem = kms[1] || 0;
 
-  const kms = [...t.matchAll(/([\d.,]+)\s*km/gi)].map(m =>
-    Number(m[1].replace(",", "."))
-  );
+return {
+  app: detectarAplicativo(t),
+  valor: valores[0] || 0,
 
-  const minutos = [...t.matchAll(/(\d+)\s*min/gi)].map(m =>
-    Number(m[1])
-  );
+  tempoAte,
+  tempoViagem,
+  tempoTotal: tempoAte + tempoViagem,
 
-  const notaMatch = t.match(/([\d.,]+)\s*★/);
+  kmAte,
+  kmViagem,
+  kmTotal: kmAte + kmViagem,
 
-  return {
-    app: detectarAplicativo(t),
-    valor: valores[0] || 0,
-    kmTotal: kms.reduce((acc, n) => acc + n, 0),
-    tempoTotal: minutos.reduce((acc, n) => acc + n, 0),
-    nota: notaMatch ? Number(notaMatch[1].replace(",", ".")) : 0
-  };
+  nota: notaMatch ? Number(notaMatch[1].replace(",", ".")) : 0
+};
 }
 
 // ===============================
