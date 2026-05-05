@@ -1206,7 +1206,9 @@ function salvarHistoricoSimulador(item) {
   localStorage.setItem("historicoSimulador", JSON.stringify(historico));
 
   renderizarHistoricoChamadas();
+  renderizarInsights();
 }
+
 
 function calcularLogicaSemaforo(pctKm, pctHora, pctNota) {
   const limitar = valor => Math.min(Number(valor || 0), 100);
@@ -1995,6 +1997,8 @@ box.innerHTML = historico.slice(0, 5).map(item => `
     </div>
   `).join("");
 }
+
+renderizarInsights();
 
 function configurarLeitorChamada() {
   const botao = pegarElemento("btn-processar-chamada");
