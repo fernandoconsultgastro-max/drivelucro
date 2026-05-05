@@ -97,12 +97,6 @@ Foco: leitura rápida, decisão e impacto visual
   <small id="custos-detalhe">Lançados + rodagem</small>
 </div>
 
-    <div class="card premium-card destaque-lucro card-click" id="card-lucro" data-acao-card="relatorios">
-      <span>Lucro real</span>
-      <strong id="lucro">R$ 0,00</strong>
-      <small>Resultado líquido</small>
-    </div>
-
     <div class="card premium-card card-click" data-acao-card="corridas">
       <span>Km rodado</span>
       <strong id="km-total">0.0 km</strong>
@@ -260,19 +254,27 @@ Foco: leitura rápida, decisão e impacto visual
       <h2>Simulador</h2>
 
       <!-- PARSER -->
-      <div class="parser-box">
-        <h3>Leitor de chamada</h3>
+     <div class="leitor-box">
+  <h3>Leitor de chamada</h3>
 
-        <div id="decisao-rapida" class="decisao-rapida oculto">
-          Aguardando chamada...
-        </div>
+  <select id="app-leitor">
+    <option value="uber">Uber</option>
+    <option value="99">99</option>
+    <option value="indrive">inDrive</option>
+  </select>
 
-        <textarea id="texto-chamada" placeholder="Ex: R$ 55,50 • 18,3 km • 35 min • 4.8 ★"></textarea>
-        <button id="btn-processar-chamada">Processar chamada</button>
+  <textarea 
+    id="texto-chamada" 
+    placeholder="Cole aqui os dados da chamada do app selecionado">
+  </textarea>
 
-        <div id="historico-chamadas"></div>
-      </div>
-      
+  <button id="btn-processar-chamada">Processar chamada</button>
+
+  <div id="historico-chamadas">
+    <p>Nenhuma chamada analisada ainda.</p>
+  </div>
+</div>
+
      <!-- REGRAS -->
 <div class="regras-box">
   <h3>Minhas regras</h3>
