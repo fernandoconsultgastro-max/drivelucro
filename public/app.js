@@ -1947,6 +1947,31 @@ function renderizarHistoricoVeiculo() {
   `).join("");
 }
 
+function atualizarBotaoModoPro() {
+  const btn = document.getElementById("btn-modo-pro");
+  if (!btn) return;
+
+  const ativo = localStorage.getItem("modoProCopiloto") === "true";
+
+  btn.textContent = ativo ? "Modo PRO: ON" : "Modo PRO: OFF";
+  btn.classList.toggle("ativo", ativo);
+}
+
+function toggleModoPro() {
+  const atual = localStorage.getItem("modoProCopiloto") === "true";
+
+  if (atual) {
+    desativarModoProCopiloto();
+  } else {
+    ativarModoProCopiloto();
+  }
+
+  atualizarBotaoModoPro();
+}
+
+window.toggleModoPro = toggleModoPro;
+window.atualizarBotaoModoPro = atualizarBotaoModoPro;
+
 function init() {
   configurarMenu();
   configurarFormularioCorrida();
