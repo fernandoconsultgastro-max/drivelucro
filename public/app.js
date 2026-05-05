@@ -1906,12 +1906,18 @@ function renderizarHistoricoChamadas() {
   historico = historico.filter(item => item.dataISO === hoje);
   localStorage.setItem("historicoSimulador", JSON.stringify(historico));
 
-  if (!historico.length) {
-    box.innerHTML = "<p>Nenhuma chamada analisada ainda.</p>";
-    return;
-  }
+const filtro = pegarElemento("filtro-historico-chamadas")?.value || "todas";
 
-  box.innerHTML = historico.map(item => `
+if (filtro !== "todas") {
+  historico = historico.filter(item => item.decisao === filtro);
+}
+
+if (!historico.length) {
+  box.innerHTML = "<p>Nenhuma chamada encontrada para este filtro.</p>";
+  return;
+}
+
+box.innerHTML = historico.slice(0, 5).map(item => `
     <div class="historico-chamada-item">
       <strong>${item.hora} — ${item.decisao}</strong>
       <p>R$/km: ${Number(item.valorKm).toFixed(2)} • R$/hora: ${Number(item.valorHora).toFixed(2)}</p>
@@ -1922,10 +1928,15 @@ function renderizarHistoricoChamadas() {
 
 function configurarLeitorChamada() {
   const botao = pegarElemento("btn-processar-chamada");
+  const filtro = pegarElemento("filtro-historico-chamadas");
 
-  if (!botao) return;
+  if (botao) {
+    botao.addEventListener("click", processarTextoChamada);
+  }
 
-  botao.addEventListener("click", processarTextoChamada);
+  if (filtro) {
+    filtro.addEventListener("change", renderizarHistoricoChamadas);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", init);

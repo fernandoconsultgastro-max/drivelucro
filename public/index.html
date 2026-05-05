@@ -270,10 +270,20 @@ Foco: leitura rápida, decisão e impacto visual
 
   <button id="btn-processar-chamada">Processar chamada</button>
 
+ <details class="historico-filtro-box">
+  <summary>Histórico de chamadas</summary>
+
+  <select id="filtro-historico-chamadas">
+    <option value="todas">Todas</option>
+    <option value="ACEITAR">Aceitar</option>
+    <option value="ANALISAR">Analisar</option>
+    <option value="RECUSAR">Recusar</option>
+  </select>
+
   <div id="historico-chamadas">
     <p>Nenhuma chamada analisada ainda.</p>
   </div>
-</div>
+</details>
 
      <!-- REGRAS -->
 <div class="regras-box">
