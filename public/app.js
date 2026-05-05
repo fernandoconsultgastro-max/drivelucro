@@ -1307,6 +1307,66 @@ function configurarSimulador() {
   });
 }
 
+function parseUber(texto) {
+  const origemTexto = String(texto || "")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const valorMatch = origemTexto.match(/R\$\s*(\d+[.,]?\d*)/i);
+  const tempos = [...origemTexto.matchAll(/(\d+[.,]?\d*)\s*min/gi)].map(m => m[1]);
+  const kms = [...origemTexto.matchAll(/(\d+[.,]?\d*)\s*km/gi)].map(m => m[1]);
+
+  const notaMatch =
+    origemTexto.match(/(\d+[.,]?\d*)\s*★/i) ||
+    origemTexto.match(/nota\s*:?\s*(\d+[.,]?\d*)/i);
+
+  return {
+    app: "Uber",
+    valor: normalizarNumero(valorMatch ? valorMatch[1] : 0),
+    kmAtePassageiro: normalizarNumero(kms[0] || 0),
+    kmViagem: normalizarNumero(kms[1] || 0),
+    kmTotal: normalizarNumero(kms[0] || 0) + normalizarNumero(kms[1] || 0),
+    tempoAtePassageiro: normalizarNumero(tempos[0] || 0),
+    tempoViagem: normalizarNumero(tempos[1] || 0),
+    tempoTotal: normalizarNumero(tempos[0] || 0) + normalizarNumero(tempos[1] || 0),
+    nota: normalizarNumero(notaMatch ? notaMatch[1] : 5),
+    origemTexto
+  };
+}
+
+function parse99(texto) {
+  const origemTexto = String(texto || "")
+    .replace(/\n/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const valorMatch = origemTexto.match(/R\$\s*(\d+[.,]?\d*)/i);
+  const tempos = [...origemTexto.matchAll(/(\d+[.,]?\d*)\s*min/gi)].map(m => m[1]);
+  const kms = [...origemTexto.matchAll(/(\d+[.,]?\d*)\s*km/gi)].map(m => m[1]);
+
+  const notaMatch =
+    origemTexto.match(/(\d+[.,]?\d*)\s*★/i) ||
+    origemTexto.match(/nota\s*:?\s*(\d+[.,]?\d*)/i);
+
+  return {
+    app: "99",
+    valor: normalizarNumero(valorMatch ? valorMatch[1] : 0),
+    kmAtePassageiro: kms.length >= 2 ? normalizarNumero(kms[0]) : 0,
+    kmViagem: kms.length >= 2 ? normalizarNumero(kms[1]) : normalizarNumero(kms[0] || 0),
+    kmTotal: kms.length >= 2
+      ? normalizarNumero(kms[0]) + normalizarNumero(kms[1])
+      : normalizarNumero(kms[0] || 0),
+    tempoAtePassageiro: tempos.length >= 2 ? normalizarNumero(tempos[0]) : 0,
+    tempoViagem: tempos.length >= 2 ? normalizarNumero(tempos[1]) : normalizarNumero(tempos[0] || 0),
+    tempoTotal: tempos.length >= 2
+      ? normalizarNumero(tempos[0]) + normalizarNumero(tempos[1])
+      : normalizarNumero(tempos[0] || 0),
+    nota: normalizarNumero(notaMatch ? notaMatch[1] : 5),
+    origemTexto
+  };
+}
+
 function processarTextoChamada() {
   const textarea = pegarElemento("texto-chamada");
   const seletorApp = pegarElemento("app-leitor");
