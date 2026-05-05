@@ -1319,16 +1319,19 @@ const decisaoFinal = semaforo.decisao;
     </div>
   `;
 
-  salvarHistoricoSimulador({
-    decisao: decisaoFinal,
-    valor: dados.valor,
-    valorKm: resultado.valorKm,
-    valorHora: resultado.valorHora,
-    nota: dados.nota,
-    km: dados.km ?? dados.kmTotal,
-    tempo: dados.tempo ?? dados.tempoTotal
-  });
+ const kmHistorico = Number(dados.km ?? dados.kmTotal ?? 0);
+const tempoHistorico = Number(dados.tempo ?? dados.tempoTotal ?? 0);
+const notaHistorico = Number(dados.nota ?? 0);
 
+salvarHistoricoSimulador({
+  decisao: decisaoFinal,
+  valor: dados.valor,
+  valorKm: resultado.valorKm,
+  valorHora: resultado.valorHora,
+  nota: notaHistorico,
+  km: kmHistorico,
+  tempo: tempoHistorico
+});
   clearTimeout(window.driveAlertaTimer);
 
   window.driveAlertaTimer = setTimeout(() => {
@@ -1994,8 +1997,8 @@ box.innerHTML = historico.slice(0, 5).map(item => `
       <strong>${item.hora} — ${item.decisao}</strong>
       <p>R$/km: ${Number(item.valorKm).toFixed(2)} • R$/hora: ${Number(item.valorHora).toFixed(2)}</p>
       <p>
-  ${Number(item.tempo ?? item.tempoTotal ?? 0).toFixed(0)} min •
-  ${Number(item.km ?? item.kmTotal ?? 0).toFixed(1)} km •
+${Number(item.tempo || 0).toFixed(0)} min •
+${Number(item.km || 0).toFixed(1)} km •
   Nota ${Number(item.nota ?? 0).toFixed(1)}
 </p>
     </div>
