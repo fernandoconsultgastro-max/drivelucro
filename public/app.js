@@ -2606,7 +2606,7 @@ clearTimeout(window.copilotoOverlayTimer);
 
 window.copilotoOverlayTimer = setTimeout(() => {
   overlay.classList.add("oculto");
-}, 8000);
+}, 5000);
   }
 }
 
