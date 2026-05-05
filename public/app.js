@@ -1325,8 +1325,8 @@ const decisaoFinal = semaforo.decisao;
     valorKm: resultado.valorKm,
     valorHora: resultado.valorHora,
     nota: dados.nota,
-    km: dados.km,
-    tempo: dados.tempo
+    km: dados.km ?? dados.kmTotal,
+    tempo: dados.tempo ?? dados.tempoTotal
   });
 
   clearTimeout(window.driveAlertaTimer);
