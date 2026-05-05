@@ -1170,3 +1170,15 @@ BLOCO PREMIUM 03 — COPILOTO
 #filtro-historico-chamadas {
   margin-bottom: 10px;
 }
+
+.historico-chamada-item.aceitar {
+  border-left: 4px solid #00ff88;
+}
+
+.historico-chamada-item.analisar {
+  border-left: 4px solid #ffc107;
+}
+
+.historico-chamada-item.recusar {
+  border-left: 4px solid #ff4d4f;
+}

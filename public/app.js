@@ -1918,7 +1918,7 @@ if (!historico.length) {
 }
 
 box.innerHTML = historico.slice(0, 5).map(item => `
-    <div class="historico-chamada-item">
+    <div class="historico-chamada-item ${item.decisao.toLowerCase()}">
       <strong>${item.hora} — ${item.decisao}</strong>
       <p>R$/km: ${Number(item.valorKm).toFixed(2)} • R$/hora: ${Number(item.valorHora).toFixed(2)}</p>
       <p>${Number(item.tempo).toFixed(0)} min • ${Number(item.km).toFixed(1)} km • Nota ${Number(item.nota).toFixed(1)}</p>
