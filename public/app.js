@@ -2424,7 +2424,25 @@ function gerarMensagem(decisao, indicadores, dados) {
 // PONTE
 // ===============================
 
-let perfilSelecionado =
+function gerarPacoteCopiloto(texto) {
+  const dados = extrairDadosBasicos(texto);
+
+  const sucesso =
+    dados.valor > 0 &&
+    dados.kmTotal > 0 &&
+    dados.tempoTotal > 0;
+
+  if (!sucesso) {
+    return {
+      sucesso: false,
+      app: dados.app,
+      decisao: "INDEFINIDO",
+      mensagem: "Não foi possível extrair valor, km ou tempo da tela.",
+      dados
+    };
+  }
+
+  let perfilSelecionado =
   document.getElementById("perfil-regra")?.value || "equilibrado";
 
 let regras = {
@@ -2495,6 +2513,32 @@ if (perfilSelecionado === "inteligente") {
     regras.metaHora = 50;
     regras.notaMinima = 4.5;
   }
+}
+
+const statusHora = avaliarRegra(indicadores.lucroPorHora, regras.metaHora);
+  const statusNota = avaliarNota(dados.nota, regras.notaMinima);
+
+ const decisaoBase = decisaoFinal(statusKm, statusHora, statusNota);
+ const analisePro = aplicarModoPro(decisaoBase, dados, indicadores, regras);
+ const decisao = analisePro.decisao;
+
+  return {
+    sucesso: true,
+    origem: "leitura_tela_simulada",
+    app: dados.app,
+    decisao,
+    mensagem: gerarMensagem(decisao, indicadores, dados),
+    dados,
+    indicadores,
+    status: {
+      km: statusKm,
+      hora: statusHora,
+      nota: statusNota
+    },
+   regras,
+   modoPro: analisePro.modoPro,
+  motivoPro: analisePro.motivoPro
+  };
 }
 
 function alterarPerfilCopiloto(perfil) {
