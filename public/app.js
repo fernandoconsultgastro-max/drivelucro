@@ -2420,6 +2420,52 @@ function gerarMensagem(decisao, indicadores, dados) {
 
   return `Corrida fraca: R$ ${km}/km, R$ ${hora}/hora e nota ${dados.nota}.`;
 }
+
+function calcularScoreAdaptativo(dados, indicadores, status, analisePro) {
+  let score = 100;
+
+  const lucroPorKm = Number(indicadores.lucroPorKm || 0);
+  const lucroPorHora = Number(indicadores.lucroPorHora || 0);
+  const kmAte = Number(dados.kmAte || 0);
+  const tempoAte = Number(dados.tempoAte || 0);
+  const nota = Number(dados.nota || 0);
+
+  if (status.km === "amarelo") score -= 18;
+  if (status.km === "vermelho") score -= 38;
+
+  if (status.hora === "amarelo") score -= 18;
+  if (status.hora === "vermelho") score -= 38;
+
+  if (status.nota === "amarelo") score -= 12;
+  if (status.nota === "vermelho") score -= 28;
+
+  if (kmAte > 3) score -= 10;
+  if (kmAte > 5) score -= 18;
+
+  if (tempoAte > 8) score -= 10;
+  if (tempoAte > 12) score -= 18;
+
+  if (lucroPorKm <= 0) score -= 25;
+  if (lucroPorHora <= 0) score -= 25;
+
+  if (analisePro?.modoPro && analisePro?.motivoPro !== "corrida aprovada pelos critérios PRO") {
+    score -= 10;
+  }
+
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  let faixa = "excelente";
+
+  if (score < 80) faixa = "boa";
+  if (score < 60) faixa = "atenção";
+  if (score < 40) faixa = "ruim";
+  if (score < 20) faixa = "crítica";
+
+  return {
+    score,
+    faixa
+  };
+}
 // ===============================
 // PONTE
 // ===============================
@@ -2521,6 +2567,16 @@ const statusHora = avaliarRegra(indicadores.lucroPorHora, regras.metaHora);
  const decisaoBase = decisaoFinal(statusKm, statusHora, statusNota);
  const analisePro = aplicarModoPro(decisaoBase, dados, indicadores, regras);
  const decisao = analisePro.decisao;
+ const scoreAdaptativo = calcularScoreAdaptativo(
+  dados,
+  indicadores,
+  {
+    km: statusKm,
+    hora: statusHora,
+    nota: statusNota
+  },
+  analisePro
+);
 
   return {
     sucesso: true,
@@ -2537,7 +2593,8 @@ const statusHora = avaliarRegra(indicadores.lucroPorHora, regras.metaHora);
     },
    regras,
    modoPro: analisePro.modoPro,
-  motivoPro: analisePro.motivoPro
+   motivoPro: analisePro.motivoPro,
+   scoreAdaptativo
   };
 }
 
