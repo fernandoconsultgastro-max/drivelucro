@@ -2480,8 +2480,8 @@ if (perfilSelecionado === "equilibrado") {
 
 if (perfilSelecionado === "inteligente") {
 
-  const historico =
-    JSON.parse(localStorage.getItem("historicoChamadas")) || [];
+const historico =
+  JSON.parse(localStorage.getItem("historicoSimulador")) || [];
 
   const aceitas =
     historico.filter(h => h.decisao === "ACEITAR");
@@ -2490,17 +2490,17 @@ if (perfilSelecionado === "inteligente") {
 
     const mediaKm =
       aceitas.reduce((acc, h) =>
-        acc + Number(h.indicadores?.valorPorKm || 0), 0
+        acc + Number(h.valorKm|| 0), 0
       ) / aceitas.length;
 
     const mediaHora =
       aceitas.reduce((acc, h) =>
-        acc + Number(h.indicadores?.valorPorHora || 0), 0
+        acc + Number(h.valorHora|| 0), 0
       ) / aceitas.length;
 
     const mediaNota =
       aceitas.reduce((acc, h) =>
-        acc + Number(h.dados?.nota || 0), 0
+        acc + Number(h.nota|| 0), 0
       ) / aceitas.length;
 
     regras.metaKm = Number((mediaKm * 0.92).toFixed(2));
