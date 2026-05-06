@@ -2424,77 +2424,77 @@ function gerarMensagem(decisao, indicadores, dados) {
 // PONTE
 // ===============================
 
-function gerarPacoteCopiloto(texto) {
-  const dados = extrairDadosBasicos(texto);
+let perfilSelecionado =
+  document.getElementById("perfil-regra")?.value || "equilibrado";
 
-  const sucesso =
-    dados.valor > 0 &&
-    dados.kmTotal > 0 &&
-    dados.tempoTotal > 0;
+let regras = {
+  perfil: perfilSelecionado,
+  metaKm: 2.5,
+  metaHora: 50,
+  notaMinima: 4.5
+};
 
-  if (!sucesso) {
-    return {
-      sucesso: false,
-      app: dados.app,
-      decisao: "INDEFINIDO",
-      mensagem: "Não foi possível extrair valor, km ou tempo da tela.",
-      dados
-    };
+// ===============================
+// PERFIS PADRÃO
+// ===============================
+
+if (perfilSelecionado === "conservador") {
+  regras.metaKm = 3.0;
+  regras.metaHora = 60;
+  regras.notaMinima = 4.8;
+}
+
+if (perfilSelecionado === "agressivo") {
+  regras.metaKm = 1.8;
+  regras.metaHora = 35;
+  regras.notaMinima = 4.0;
+}
+
+if (perfilSelecionado === "equilibrado") {
+  regras.metaKm = 2.5;
+  regras.metaHora = 50;
+  regras.notaMinima = 4.5;
+}
+
+// ===============================
+// PERFIL INTELIGENTE
+// ===============================
+
+if (perfilSelecionado === "inteligente") {
+
+  const historico =
+    JSON.parse(localStorage.getItem("historicoChamadas")) || [];
+
+  const aceitas =
+    historico.filter(h => h.decisao === "ACEITAR");
+
+  if (aceitas.length > 3) {
+
+    const mediaKm =
+      aceitas.reduce((acc, h) =>
+        acc + Number(h.indicadores?.valorPorKm || 0), 0
+      ) / aceitas.length;
+
+    const mediaHora =
+      aceitas.reduce((acc, h) =>
+        acc + Number(h.indicadores?.valorPorHora || 0), 0
+      ) / aceitas.length;
+
+    const mediaNota =
+      aceitas.reduce((acc, h) =>
+        acc + Number(h.dados?.nota || 0), 0
+      ) / aceitas.length;
+
+    regras.metaKm = Number((mediaKm * 0.92).toFixed(2));
+    regras.metaHora = Number((mediaHora * 0.92).toFixed(2));
+    regras.notaMinima = Number((mediaNota * 0.96).toFixed(1));
+
+  } else {
+
+    regras.metaKm = 2.5;
+    regras.metaHora = 50;
+    regras.notaMinima = 4.5;
   }
-
-  const indicadores = calcularIndicadores(dados);
-
-  const perfilCopiloto =
-    localStorage.getItem("perfilCopiloto") || "inteligente";
-
-  const perfisCopiloto = {
-    conservador: {
-      perfil: "conservador",
-      metaKm: 2.8,
-      metaHora: 55,
-      notaMinima: 4.7
-    },
-    inteligente: {
-      perfil: "inteligente",
-      metaKm: 2.2,
-      metaHora: 45,
-      notaMinima: 4.5
-    },
-    agressivo: {
-      perfil: "agressivo",
-      metaKm: 1.7,
-      metaHora: 35,
-      notaMinima: 4.2
-    }
-  };
-
-  const regras = perfisCopiloto[perfilCopiloto] || perfisCopiloto.inteligente;
-
- const statusKm = avaliarRegra(indicadores.lucroPorKm, regras.metaKm);
-const statusHora = avaliarRegra(indicadores.lucroPorHora, regras.metaHora);
-  const statusNota = avaliarNota(dados.nota, regras.notaMinima);
-
- const decisaoBase = decisaoFinal(statusKm, statusHora, statusNota);
- const analisePro = aplicarModoPro(decisaoBase, dados, indicadores, regras);
- const decisao = analisePro.decisao;
-
-  return {
-    sucesso: true,
-    origem: "leitura_tela_simulada",
-    app: dados.app,
-    decisao,
-    mensagem: gerarMensagem(decisao, indicadores, dados),
-    dados,
-    indicadores,
-    status: {
-      km: statusKm,
-      hora: statusHora,
-      nota: statusNota
-    },
-   regras,
-   modoPro: analisePro.modoPro,
-  motivoPro: analisePro.motivoPro
-  };
 }
 
 function alterarPerfilCopiloto(perfil) {
