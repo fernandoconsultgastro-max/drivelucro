@@ -2047,6 +2047,47 @@ function configurarLeitorChamada() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
+window.testarOverlayAndroid = async function () {
+
+  try {
+
+    if (!window.Capacitor) {
+      alert("Capacitor não disponível");
+      return;
+    }
+
+    const { OverlayPlugin } =
+      window.Capacitor.Plugins;
+
+    await OverlayPlugin.mostrarOverlay({
+      texto: "DriveLucro Overlay Ativo"
+    });
+
+    console.log("Overlay ativado");
+
+  } catch (erro) {
+
+    console.error("Erro overlay:", erro);
+  }
+};
+
+window.removerOverlayAndroid = async function () {
+
+  try {
+
+    const { OverlayPlugin } =
+      window.Capacitor.Plugins;
+
+    await OverlayPlugin.removerOverlay();
+
+    console.log("Overlay removido");
+
+  } catch (erro) {
+
+    console.error("Erro remover overlay:", erro);
+  }
+};
 // ===============================
 // BLOCO 30 — CONTROLE DRAWER
 // MANUTENÇÃO:
