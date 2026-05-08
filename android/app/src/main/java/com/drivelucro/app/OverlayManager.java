@@ -12,9 +12,7 @@ import android.widget.TextView;
 public class OverlayManager {
 
     private final Activity activity;
-
     private WindowManager windowManager;
-
     private LinearLayout overlayView;
 
     public OverlayManager(Activity activity) {
@@ -25,49 +23,36 @@ public class OverlayManager {
 
         if (overlayView != null) return;
 
+        String decisaoTexto = extrairDecisao(texto);
+        int corDecisao = definirCorDecisao(decisaoTexto);
+
         windowManager =
                 (WindowManager) activity.getSystemService(Activity.WINDOW_SERVICE);
 
         overlayView = new LinearLayout(activity);
-
         overlayView.setOrientation(LinearLayout.VERTICAL);
-
-        overlayView.setPadding(40, 40, 40, 40);
-
-        overlayView.setBackgroundColor(Color.parseColor("#CC111111"));
+        overlayView.setPadding(36, 30, 36, 30);
+        overlayView.setBackgroundColor(Color.parseColor("#E6111111"));
 
         TextView titulo = new TextView(activity);
-
         titulo.setText("DriveLucro Copiloto");
-
         titulo.setTextColor(Color.WHITE);
-
-        titulo.setTextSize(18);
-
+        titulo.setTextSize(15);
         titulo.setTypeface(null, Typeface.BOLD);
 
         TextView decisao = new TextView(activity);
-
-        decisao.setText("ACEITAR");
-
-        decisao.setTextColor(Color.GREEN);
-
-        decisao.setTextSize(26);
-
+        decisao.setText(decisaoTexto);
+        decisao.setTextColor(corDecisao);
+        decisao.setTextSize(28);
         decisao.setTypeface(null, Typeface.BOLD);
 
         TextView detalhes = new TextView(activity);
-
         detalhes.setText(texto);
-
         detalhes.setTextColor(Color.WHITE);
-
-        detalhes.setTextSize(15);
+        detalhes.setTextSize(14);
 
         overlayView.addView(titulo);
-
         overlayView.addView(decisao);
-
         overlayView.addView(detalhes);
 
         WindowManager.LayoutParams params =
@@ -80,18 +65,43 @@ public class OverlayManager {
                 );
 
         params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-
         params.y = 220;
 
         windowManager.addView(overlayView, params);
     }
 
+    private String extrairDecisao(String texto) {
+        if (texto == null) return "ANALISAR";
+
+        String t = texto.toUpperCase();
+
+        if (t.contains("ACEITAR")) return "ACEITAR";
+        if (t.contains("RECUSAR")) return "RECUSAR";
+        if (t.contains("ANALISAR")) return "ANALISAR";
+
+        return "ANALISAR";
+    }
+
+    private int definirCorDecisao(String decisao) {
+        if ("ACEITAR".equals(decisao)) {
+            return Color.parseColor("#39FF14");
+        }
+
+        if ("ANALISAR".equals(decisao)) {
+            return Color.parseColor("#FFD54A");
+        }
+
+        if ("RECUSAR".equals(decisao)) {
+            return Color.parseColor("#FF3B30");
+        }
+
+        return Color.WHITE;
+    }
+
     public void removerOverlay() {
 
         if (overlayView != null && windowManager != null) {
-
             windowManager.removeView(overlayView);
-
             overlayView = null;
         }
     }
