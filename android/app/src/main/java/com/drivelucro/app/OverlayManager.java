@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,6 +15,12 @@ public class OverlayManager {
     private final Activity activity;
     private WindowManager windowManager;
     private LinearLayout overlayView;
+    private WindowManager.LayoutParams params;
+
+    private int inicialX;
+    private int inicialY;
+    private float toqueInicialX;
+    private float toqueInicialY;
 
     public OverlayManager(Activity activity) {
         this.activity = activity;
@@ -55,7 +62,7 @@ public class OverlayManager {
         overlayView.addView(decisao);
         overlayView.addView(detalhes);
 
-        WindowManager.LayoutParams params =
+        params =
                 new WindowManager.LayoutParams(
                         WindowManager.LayoutParams.WRAP_CONTENT,
                         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -64,8 +71,34 @@ public class OverlayManager {
                         PixelFormat.TRANSLUCENT
                 );
 
-        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        params.y = 220;
+        params.gravity = Gravity.TOP | Gravity.START;
+        params.x = 40;
+        params.y = 180;
+
+        overlayView.setOnTouchListener((view, event) -> {
+
+            switch (event.getAction()) {
+
+                case MotionEvent.ACTION_DOWN:
+                    inicialX = params.x;
+                    inicialY = params.y;
+                    toqueInicialX = event.getRawX();
+                    toqueInicialY = event.getRawY();
+                    return true;
+
+                case MotionEvent.ACTION_MOVE:
+                    params.x = inicialX + (int) (event.getRawX() - toqueInicialX);
+                    params.y = inicialY + (int) (event.getRawY() - toqueInicialY);
+
+                    if (windowManager != null && overlayView != null) {
+                        windowManager.updateViewLayout(overlayView, params);
+                    }
+                    return true;
+
+                default:
+                    return false;
+            }
+        });
 
         windowManager.addView(overlayView, params);
     }
