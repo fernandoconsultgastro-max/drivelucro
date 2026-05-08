@@ -2060,9 +2060,22 @@ window.testarOverlayAndroid = async function () {
     const { OverlayPlugin } =
       window.Capacitor.Plugins;
 
-    await OverlayPlugin.mostrarOverlay({
-      texto: "DriveLucro Overlay Ativo"
-    });
+   const pacote = gerarPacoteCopiloto(`
+Uber
+R$ 35
+4 min
+2 km
+20 min
+12 km
+4.9 ★
+`);
+
+await OverlayPlugin.mostrarOverlay({
+  decisao: pacote.decisao,
+  mensagem: pacote.mensagem,
+  valorKm: pacote.indicadores.valorPorKm.toFixed(2),
+  valorHora: pacote.indicadores.valorPorHora.toFixed(2)
+});
 
     console.log("Overlay ativado");
 

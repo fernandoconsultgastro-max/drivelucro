@@ -21,7 +21,16 @@ public class OverlayPlugin extends Plugin {
 
     @PluginMethod
     public void mostrarOverlay(PluginCall call) {
-        String texto = call.getString("texto", "Overlay ativo");
+        String decisao = call.getString("decisao", "ANALISAR");
+        String mensagem = call.getString("mensagem", "Aguardando dados da corrida");
+        String valorKm = call.getString("valorKm", "0.00");
+        String valorHora = call.getString("valorHora", "0.00");
+
+        String texto =
+                "Decisão: " + decisao +
+                        "\nR$/km: " + valorKm +
+                        "\nR$/hora: " + valorHora +
+                        "\n" + mensagem;
 
         if (!Settings.canDrawOverlays(getContext())) {
             Intent intent = new Intent(
